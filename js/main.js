@@ -1,4 +1,3 @@
-// js/main.js
 import { initDOM } from "./dom.js";
 import { Handlers, initGame } from "./game.js";
 
