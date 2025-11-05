@@ -20,9 +20,9 @@ export function normalizePokemonName(input) {
 
 export function formatDebut(gen, title) {
   if (!gen && !title) return "—";
-  const g = gen ? `第${gen}世代` : "";
-  const t = title ? `（${title}）` : "";
-  return `${g}${t}` || "—";
+  const t = title ? `${title}` : "";
+  const g = gen ? `（${gen}世代）` : "";
+  return `${t}${g}` || "—";
 }
 
 export function formatGenderRate(rate) {
