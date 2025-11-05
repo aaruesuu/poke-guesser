@@ -1,5 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=DotGothic16&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=M+PLUS+1p:wght@500;700;800&display=swap");
 :root {
   --c-bg: #c41e3a;
   --c-main-bg: #d1e9dd;
@@ -155,14 +156,15 @@ body {
   border-bottom: none;
 }
 #selection-title {
-  font-family:
-    Zen Maru Gothic,
-    sans-serif;
-  font-size: 0.8rem;
-  font-weight: 700;
+  font-family: "M PLUS 1p", "Zen Maru Gothic", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", sans-serif;
+  font-size: clamp(1.1rem, 1.4vw + 0.6rem, 1.6rem);
+  color: var(--c-text);
+  font-weight: 600;
+  letter-spacing: 0.01em;
   margin-bottom: 1.2rem;
   text-align: center;
 }
+  
 .mode-selection-container {
   align-items: center;
   display: flex;
@@ -290,6 +292,12 @@ body {
   margin-right: 8px;
   width: 32px;
 }
+#result-history-correct {
+  border: 3px solid var(--c-correct);
+}
+#result-history-correct > .result-header{
+  background: var(--c-correct);
+}
 #results-area {
   background: var(--c-black-op10);
   border-radius: 4px;
@@ -301,18 +309,24 @@ body {
 }
 .result-row {
   background-color: hsla(0, 0%, 100%, 0.7);
-  border: 1px solid var(--c-black-op10);
+  border: 3px solid var(--c-wrong);
   border-radius: 8px;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   padding: 0.6rem 0.7rem;
 }
 .result-header {
   align-items: center;
-  border-bottom: 2px dashed var(--c-black-op20);
   display: flex;
   gap: 0.8rem;
   justify-content: center;
-  margin-bottom: 0.8rem;
+  padding-bottom: 0.6rem;
+  border-radius: 5px;
+}
+.result-header[aria-expanded="true"] {
+  align-items: center;
+  display: flex;
+  gap: 0.8rem;
+  margin-bottom: 0.6rem;
   padding-bottom: 0.6rem;
 }
 .result-name {
@@ -363,7 +377,7 @@ body {
   opacity: 0.7;
 }
 .result-row-classic .result-body > div:first-child:before {
-  content: "世代/作品";
+  content: "初登場作品（世代）";
 }
 .result-row-classic .result-body > div:nth-child(2):before {
   content: "合計種族値";
@@ -416,7 +430,7 @@ body {
   color: var(--c-text);
 }
 .bg-gray {
-  background-color: var(--c-wrong);
+  background-color: rgba(0, 0, 0, 0.4);;
   color: var(--c-white);
 }
 .text-red {
@@ -475,8 +489,8 @@ body {
   cursor: pointer;
   font-size: 1.2rem;
   position: absolute;
-  right: 0.5rem;
-  top: 0.5rem;
+  right: 0.8rem;
+  top: 0.8rem;
 }
 #result-modal-verdict {
   font-size: 1.8rem;
@@ -576,19 +590,20 @@ body {
 #post-game-back-to-menu,
 #post-game-play-again {
   border: 3px solid var(--c-border);
-  border-radius: 8px;
-  color: var(--c-white);
+  border-radius: 50px;
+  color: var(--c-text);
   cursor: pointer;
   font-size: 0.8rem;
   font-weight: 700;
   padding: 0.6rem;
   width: 90%;
+  margin-bottom: 0.2rem;
 }
 #post-game-play-again {
-  background-color: #53a2d0;
+  background-color: var(--c-white);
 }
 #post-game-back-to-menu {
-  background-color: #64b46c;
+  background-color: var(--c-white);
 }
 .hidden {
   display: none !important;
@@ -690,9 +705,15 @@ body {
 .accordion-header {
   margin: 0;
 }
+.modal-body .accordion-header .accordion-trigger {
+  background: rgba(0,0,0,0.25);
+  border: 1px solid var(--c-border);
+  backdrop-filter: blur(2px);
+}
 .accordion-trigger {
   align-items: center;
-  background: rgba(0, 0, 0, 0.25);
+  background: var(--c-wrong);
+  /* background: rgba(0, 0, 0, 0.25); */
   border: none;
   color: #fff;
   cursor: pointer;
@@ -716,7 +737,7 @@ body {
   transform: rotate(-90deg);
 }
 .accordion-panel {
-  background: rgba(0, 0, 0, 0.12);
+  /* background: rgba(0, 0, 0, 0.12); */
   overflow: hidden;
   transition: max-height 0.2s ease;
   will-change: max-height;
