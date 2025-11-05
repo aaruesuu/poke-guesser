@@ -120,13 +120,14 @@ function handleGuess() {
 
   const comparisonResult = comparePokemon(guessedPokemon, correctPokemon);
   if (!comparisonResult) return;
-
-  renderResult(guessedPokemon, comparisonResult, gameMode);
+  
+  const isCorrect = isCorrectAnswer(guessedPokemon, correctPokemon);
+  renderResult(guessedPokemon, comparisonResult, gameMode, isCorrect);
 
   guessesLeft--;
   setGameStatus(`残り回数：${guessesLeft}`);
 
-  if (isCorrectAnswer(guessedPokemon, correctPokemon)) {
+  if (isCorrect) {
     endGame(true);
   } else if ((gameMode === 'classic' || gameMode === 'randomStart') && guessesLeft <= 0) {
     endGame(false);
