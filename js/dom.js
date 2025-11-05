@@ -45,6 +45,27 @@ const postGameBackToMenuButton = document.getElementById('post-game-back-to-menu
 const gameTitle = document.getElementById('game-title');
 const gameStatus = document.getElementById('game-status');
 
+let resultAccordionSeq = 0;
+
+function toggleAccordion(btn) {
+  if (!btn) return;
+  const panelId = btn.getAttribute('aria-controls');
+  const panel = document.getElementById(panelId);
+  if (!panel) return;
+
+  const expanded = btn.getAttribute('aria-expanded') === 'true';
+  const next = !expanded;
+  btn.setAttribute('aria-expanded', String(next));
+
+  if (next) {
+    panel.hidden = false;
+    panel.style.maxHeight = panel.scrollHeight + 'px';
+  } else {
+    panel.style.maxHeight = '0px';
+    setTimeout(() => { panel.hidden = true; }, 200);
+  }
+}
+
 export function initDOM(handlers) {
   const { onStartClassic, onStartRandom, onStartStats, onGuess, onRandomStart, onPlayAgain, onBackToMenu } = handlers;
 
@@ -116,25 +137,78 @@ export function setGameStatus(text) { gameStatus.textContent = text || ""; }
 export function setGameTitle(text) { gameTitle.textContent = text || ""; }
 export function updateStatusUI(text) { gameStatus.textContent = text || ""; }
 
-export function renderResult(pokemon, comparisonResult, gameMode) {
+export function renderResult(pokemon, comparisonResult, gameMode, isCorrect = false) {
   const row = document.createElement('div');
   row.classList.add('result-row');
   row.classList.add(gameMode === 'stats' ? 'result-row-stats' : 'result-row-classic');
 
+  if (isCorrect) {
+    row.id = 'result-history-correct';
+    row.classList.add('is-correct');
+  }
+
   // --- ヘッダー ---
   const { main: mainName, form: formName } = formatDisplayName(pokemon.name);
   const displayNameHTML = formName ? `${mainName}<br><span class="form-name">${formName}</span>` : mainName;
-  const header = document.createElement('div');
-  header.classList.add('result-header');
+
+  // button化し、モーダルと同じ構造に
+  const header = document.createElement('button');
+  header.type = 'button';
+  const accId = `rh-acc-${++resultAccordionSeq}`;
+  const panelId = `${accId}-panel`;
+
+  header.classList.add('result-header', 'accordion-trigger');
+  // 既存アコーディオンの属性を流用
+  header.setAttribute('id', accId);
+  header.setAttribute('aria-controls', panelId);
+  header.setAttribute('aria-expanded','true'); // ← 基本開く
+
   header.innerHTML = `
     <img src="${pokemon.sprite}" alt="${pokemon.name}" class="result-sprite">
     <div class="result-name">${displayNameHTML}</div>
   `;
+
+  // アイコン（既存CSSが回転制御）
+  const icon = document.createElement('span');
+  icon.className = 'accordion-icon';
+  icon.setAttribute('aria-hidden','true');
+  header.appendChild(icon);
+
   row.appendChild(header);
 
+  // 初回だけ既存アコーディオン初期化 → 以後も同じ挙動で利用
+  if (!resultHistory.dataset.accordionReady) {
+    setupAccordion(resultHistory);
+    resultHistory.dataset.accordionReady = "1";
+  }
+
+  // クリック/Enter/Spaceで開閉（既存のトグルを利用）
+  header.addEventListener('click', () => toggleAccordion(header));
+  header.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      toggleAccordion(header);
+    }
+  });
+
+  // const { main: mainName, form: formName } = formatDisplayName(pokemon.name);
+  // const displayNameHTML = formName ? `${mainName}<br><span class="form-name">${formName}</span>` : mainName;
+  // const header = document.createElement('div');
+  // header.classList.add('result-header');
+  // header.innerHTML = `
+  //   <img src="${pokemon.sprite}" alt="${pokemon.name}" class="result-sprite">
+  //   <div class="result-name">${displayNameHTML}</div>
+  // `;
+  // row.appendChild(header);
+
   // --- ボディ ---
+  // bodyContainer.classList.add('result-body');
   const bodyContainer = document.createElement('div');
-  bodyContainer.classList.add('result-body');
+  bodyContainer.classList.add('result-body', 'accordion-panel');
+
+  bodyContainer.setAttribute('id', panelId);
+  bodyContainer.setAttribute('role','region');
+  bodyContainer.setAttribute('aria-labelledby', accId);
 
   const formatCombinedField = (items) => {
     const filtered = items.filter(item => item && item !== 'なし');
@@ -208,7 +282,7 @@ export function showResultModal(pokemon, verdict, gameMode, guessesLeft) {
   if (verdict === '正解') {
     crackerImages.forEach(img => img.classList.remove('hidden'));
     const guessesTaken = 10 - guessesLeft;
-    scoreEl.textContent = `${guessesTaken}回でクリア！`;
+    scoreEl.textContent = `${guessesTaken}回でクリア`;
   } else {
     crackerImages.forEach(img => img.classList.add('hidden'));
   }
@@ -248,7 +322,7 @@ export function showResultModal(pokemon, verdict, gameMode, guessesLeft) {
     pokemon.stats.spAttack + pokemon.stats.spDefense + pokemon.stats.speed;
 
   profileLeft.innerHTML = `
-    <div class="modal-grid-item"><span class="modal-grid-label">世代/作品</span><span class="modal-grid-value">${formatDebut(pokemon.debutGen, pokemon.debutTitle)}</span></div>
+    <div class="modal-grid-item"><span class="modal-grid-label">初登場作品（世代）</span><span class="modal-grid-value">${formatDebut(pokemon.debutGen, pokemon.debutTitle)}</span></div>
     <div class="modal-grid-item"><span class="modal-grid-label">合計種族値</span><span class="modal-grid-value">${totalStats}</span></div>
     <div class="modal-grid-item full-width"><span class="modal-grid-label">タイプ</span><span class="modal-grid-value">${formatCombinedField([pokemon.type1, pokemon.type2])}</span></div>
     <div class="modal-grid-item full-width"><span class="modal-grid-label">特性</span><span class="modal-grid-value">${formatCombinedField([pokemon.ability1, pokemon.ability2, pokemon.hiddenAbility])}</span></div>
@@ -406,8 +480,8 @@ function openHowToPlayModal() {
       <div id="acc-panel-metrics" class="accordion-panel" role="region" aria-labelledby="acc-btn-metrics" hidden>
         <div class="accordion-panel-inner">
           <ul id="rule-bullets" class="bullets">
-            <li><strong>世代/作品</strong>：<br>
-              <span class="legend legend-green">緑</span>＝世代・作品とも一致<br>
+            <li><strong>初登場作品（世代）</strong>：<br>
+              <span class="legend legend-green">緑</span>＝初登場作品/世代とも一致<br>
               <span class="legend legend-yellow">黄</span>＝世代のみ一致<br>
               <span class="legend legend-gray">灰</span>＝世代が違う<br>※数値比較（<strong>▲/▼</strong>）も表示
             </li>
@@ -440,9 +514,9 @@ function openHowToPlayModal() {
       </h4>
       <div id="acc-panel-classic" class="accordion-panel" role="region" aria-labelledby="acc-btn-classic" hidden>
         <div class="accordion-panel-inner">
-          <p>Poke Guesserの最も基本のモードです。1プレイで最大10回の回答が可能です。<br>比較項目は以下になります。</p>
+          <p>Poke Guesserの最も基本的なモードです。1プレイで最大10回の回答が可能です。<br>比較項目は以下になります。</p>
           <ul class="bullets">
-            <li>世代/作品</li>
+            <li>初登場作品（世代）</li>
             <li>合計種族値</li>
             <li>タイプ</li>
             <li>特性</li>
@@ -468,11 +542,36 @@ function openHowToPlayModal() {
         <div class="accordion-panel-inner">
             <p> ゲーム開始時に<strong>ランダムな</strong>ポケモンの情報が1匹分表示されます。<br>
             <p class="note">※最大回答数や比較項目はクラシックモードと同様</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5) 種族値モードとは -->
+    <section class="accordion-item">
+      <h4 class="accordion-header">
+        <button class="accordion-trigger" aria-expanded="false" aria-controls="acc-panel-stats" id="acc-btn-stats">
+          種族値モードとは
+          <span class="accordion-icon" aria-hidden="true"></span>
+        </button>
+      </h4>
+      <div id="acc-panel-stats" class="accordion-panel" role="region" aria-labelledby="acc-btn-stats" hidden>
+        <div class="accordion-panel-inner">
+          <p>ポケモンの<strong>6つの種族値</strong>を手がかりに正解を推測するモードです。<br>
+          回答ごとに各種族値が一致しているかどうかが表示されます。<br>比較項目は以下になります。</p>
+          <ul class="bullets">
+            <li>hp</li>
+            <li>こうげき</li>
+            <li>ぼうぎょ</li>
+            <li>とくこう</li>
+            <li>とくぼう</li>
+            <li>すばやさ</li>
           </ul>
+          <p class="note">※最大回答数は10回です</p>
         </div>
       </div>
     </section>
   </div>
+  
 `;
 
   openModal('遊び方', howToContent);
