@@ -21,7 +21,7 @@ import {
 } from "./dom.js";
 
 // === DEBUG: 正解ポケモン固定（開発中のみ有効にしてください） ===
-const DEBUG_FIXED_ANSWER = true;           // ← 本番戻すときは false に
+const DEBUG_FIXED_ANSWER = false;           // ← 本番戻すときは false に
 const DEBUG_FIXED_NAME = 'カイリュー';
 const DEBUG_FIXED_ID = 149;
 // =======================================================
