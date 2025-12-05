@@ -75,7 +75,7 @@ export const Handlers = {
   onGuess:        () => handleGuess(),
   onRandomStart:  () => handleRandomStart(),
   onPlayAgain:    () => startGame(gameMode || 'classic'),
-  onBackToMenu:   () => { resetGame(); switchScreen('mode-selection-screen'); },
+  onBackToMenu:   () => handleBackToMenu(),
   onHint:         () => handleHintRequest(),
 };
 
@@ -249,6 +249,15 @@ function endGame(isWin) {
   gameOver = true;
   showResultModal(correctPokemon, isWin ? "正解" : "残念", gameMode, guessesLeft);
   setHintButtonEnabled(false);
+}
+
+async function handleBackToMenu() {
+  if (gameMode === 'versus' && globalThis._pgVersus && typeof globalThis._pgVersus.confirmSurrenderIfNeeded === 'function') {
+    const ok = await globalThis._pgVersus.confirmSurrenderIfNeeded();
+    if (!ok) return;
+  }
+  resetGame();
+  switchScreen('mode-selection-screen');
 }
 
 function startVersus() {
