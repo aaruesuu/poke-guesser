@@ -1,4 +1,7 @@
-import { allPokemonData } from "../all-pokemon-data.js";
+import {
+  allPokemonData
+} from "./all-pokemon-data.js";
+
 import {
   formatDisplayName,
   normalizePokemonName,
@@ -14,9 +17,11 @@ const gameContainer = document.getElementById('game-container');
 const classicModeButton = document.getElementById('classic-mode-button');
 const randomStartModeButton = document.getElementById('random-start-mode-button');
 const statsModeButton = document.getElementById('base-stats-mode-button');
+const versusModeButton = document.getElementById('versus-mode-button');
 
 const guessButton = document.getElementById('guess-button');
 const homeButton = document.getElementById('home-button');
+const hintButton = document.getElementById('hint-button');
 
 const howToPlayButton = document.getElementById('how-to-play-button');
 const howToPlayButtonHome = document.getElementById('how-to-play-button-home');
@@ -39,6 +44,7 @@ const gameControls = document.getElementById('game-controls');
 const inputArea = document.getElementById('input-area');
 const suggestionsBox = document.getElementById('suggestions-box');
 const randomStartButton = document.getElementById('random-start-button');
+const resultsArea = document.getElementById('results-area');
 
 const postGamePlayAgainButton = document.getElementById('post-game-play-again');
 const postGameBackToMenuButton = document.getElementById('post-game-back-to-menu');
@@ -47,17 +53,14 @@ const gameStatus = document.getElementById('game-status');
 
 let resultAccordionSeq = 0;
 
-function toggleAccordion(btn) {
+function setAccordionExpanded(btn, expanded) {
   if (!btn) return;
   const panelId = btn.getAttribute('aria-controls');
   const panel = document.getElementById(panelId);
   if (!panel) return;
 
-  const expanded = btn.getAttribute('aria-expanded') === 'true';
-  const next = !expanded;
-  btn.setAttribute('aria-expanded', String(next));
-
-  if (next) {
+  btn.setAttribute('aria-expanded', String(expanded));
+  if (expanded) {
     panel.hidden = false;
     panel.style.maxHeight = panel.scrollHeight + 'px';
   } else {
@@ -66,8 +69,14 @@ function toggleAccordion(btn) {
   }
 }
 
+function toggleAccordion(btn) {
+  if (!btn) return;
+  const expanded = btn.getAttribute('aria-expanded') === 'true';
+  setAccordionExpanded(btn, !expanded);
+}
+
 export function initDOM(handlers) {
-  const { onStartClassic, onStartRandom, onStartStats, onGuess, onRandomStart, onPlayAgain, onBackToMenu } = handlers;
+  const { onStartClassic, onStartRandom, onStartStats, onGuess, onRandomStart, onPlayAgain, onBackToMenu, onHint } = handlers;
 
   if (hamburgerMenu && navMenu) {
     hamburgerMenu.addEventListener('click', () => {
@@ -85,9 +94,11 @@ export function initDOM(handlers) {
   if (classicModeButton) classicModeButton.addEventListener('click', onStartClassic);
   if (randomStartModeButton) randomStartModeButton.addEventListener('click', onStartRandom);
   if (statsModeButton) statsModeButton.addEventListener('click', onStartStats);
+  if (versusModeButton && handlers.onStartVersus) versusModeButton.addEventListener('click', handlers.onStartVersus);
   if (randomStartButton) randomStartButton.addEventListener('click', onRandomStart);
   if (guessButton) guessButton.addEventListener('click', onGuess);
   if (homeButton) homeButton.addEventListener('click', onBackToMenu);
+  if (hintButton && typeof onHint === 'function') hintButton.addEventListener('click', onHint);
   if (postGamePlayAgainButton) postGamePlayAgainButton.addEventListener('click', onPlayAgain);
   if (postGameBackToMenuButton) postGameBackToMenuButton.addEventListener('click', onBackToMenu);
 
@@ -137,6 +148,20 @@ export function setGameStatus(text) { gameStatus.textContent = text || ""; }
 export function setGameTitle(text) { gameTitle.textContent = text || ""; }
 export function updateStatusUI(text) { gameStatus.textContent = text || ""; }
 
+export function hideResultsArea() {
+  if (resultsArea?.style) {
+    resultsArea.style.display = 'none';
+  }
+  resultsArea?.classList?.add('hidden');
+}
+
+export function showResultsArea() {
+  if (resultsArea?.style) {
+    resultsArea.style.display = '';
+  }
+  resultsArea?.classList?.remove('hidden');
+}
+
 export function renderResult(pokemon, comparisonResult, gameMode, isCorrect = false) {
   const row = document.createElement('div');
   row.classList.add('result-row');
@@ -147,28 +172,24 @@ export function renderResult(pokemon, comparisonResult, gameMode, isCorrect = fa
     row.classList.add('is-correct');
   }
 
-  // --- ヘッダー ---
   const { main: mainName, form: formName } = formatDisplayName(pokemon.name);
   const displayNameHTML = formName ? `${mainName}<br><span class="form-name">${formName}</span>` : mainName;
 
-  // button化し、モーダルと同じ構造に
   const header = document.createElement('button');
   header.type = 'button';
   const accId = `rh-acc-${++resultAccordionSeq}`;
   const panelId = `${accId}-panel`;
 
   header.classList.add('result-header', 'accordion-trigger');
-  // 既存アコーディオンの属性を流用
   header.setAttribute('id', accId);
   header.setAttribute('aria-controls', panelId);
-  header.setAttribute('aria-expanded','true'); // ← 基本開く
+  header.setAttribute('aria-expanded','true');
 
   header.innerHTML = `
     <img src="${pokemon.sprite}" alt="${pokemon.name}" class="result-sprite">
     <div class="result-name">${displayNameHTML}</div>
   `;
 
-  // アイコン（既存CSSが回転制御）
   const icon = document.createElement('span');
   icon.className = 'accordion-icon';
   icon.setAttribute('aria-hidden','true');
@@ -176,13 +197,11 @@ export function renderResult(pokemon, comparisonResult, gameMode, isCorrect = fa
 
   row.appendChild(header);
 
-  // 初回だけ既存アコーディオン初期化 → 以後も同じ挙動で利用
   if (!resultHistory.dataset.accordionReady) {
     setupAccordion(resultHistory);
     resultHistory.dataset.accordionReady = "1";
   }
 
-  // クリック/Enter/Spaceで開閉（既存のトグルを利用）
   header.addEventListener('click', () => toggleAccordion(header));
   header.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -191,18 +210,6 @@ export function renderResult(pokemon, comparisonResult, gameMode, isCorrect = fa
     }
   });
 
-  // const { main: mainName, form: formName } = formatDisplayName(pokemon.name);
-  // const displayNameHTML = formName ? `${mainName}<br><span class="form-name">${formName}</span>` : mainName;
-  // const header = document.createElement('div');
-  // header.classList.add('result-header');
-  // header.innerHTML = `
-  //   <img src="${pokemon.sprite}" alt="${pokemon.name}" class="result-sprite">
-  //   <div class="result-name">${displayNameHTML}</div>
-  // `;
-  // row.appendChild(header);
-
-  // --- ボディ ---
-  // bodyContainer.classList.add('result-body');
   const bodyContainer = document.createElement('div');
   bodyContainer.classList.add('result-body', 'accordion-panel');
 
@@ -220,7 +227,6 @@ export function renderResult(pokemon, comparisonResult, gameMode, isCorrect = fa
     pokemon.stats.spAttack + pokemon.stats.spDefense + pokemon.stats.speed;
 
   if (gameMode === 'stats') {
-    // 種族値
     bodyContainer.innerHTML = `
       <div class="${comparisonResult.stats.hp.class}">
         <div class="value-wrapper"><span>${pokemon.stats.hp}</span><span class="${comparisonResult.stats.hp.symbolClass}">${comparisonResult.stats.hp.symbol}</span></div>
@@ -242,7 +248,6 @@ export function renderResult(pokemon, comparisonResult, gameMode, isCorrect = fa
       </div>
     `;
   } else {
-    // クラシック/ランダム
     bodyContainer.innerHTML = `
       <div class="${comparisonResult.debut.class}">
         <div class="value-wrapper">
@@ -269,8 +274,48 @@ export function renderResult(pokemon, comparisonResult, gameMode, isCorrect = fa
 
   row.appendChild(bodyContainer);
   resultHistory.insertAdjacentElement('afterbegin', row);
+  return row;
 }
-  
+
+export function collapseResultRow(row) {
+  if (!row) return;
+  const trigger = row.querySelector('.accordion-trigger');
+  if (!trigger) return;
+  setAccordionExpanded(trigger, false);
+}
+
+export function lockResultRow(row) {
+  if (!row) return;
+  row.classList.add('versus-history-locked');
+  const trigger = row.querySelector('.accordion-trigger');
+  if (!trigger) return;
+  if (!trigger.hasAttribute('data-lock-prev-disabled')) {
+    trigger.dataset.lockPrevDisabled = trigger.disabled ? '1' : '0';
+  }
+  trigger.disabled = true;
+  trigger.setAttribute('aria-disabled', 'true');
+}
+
+export function unlockResultRow(row) {
+  if (!row) return;
+  row.classList.remove('versus-history-locked');
+  const trigger = row.querySelector('.accordion-trigger');
+  if (!trigger) return;
+  const prevDisabled = trigger.getAttribute('data-lock-prev-disabled');
+  if (prevDisabled === '1') {
+    trigger.disabled = true;
+    trigger.setAttribute('aria-disabled', 'true');
+  } else {
+    trigger.disabled = false;
+    trigger.removeAttribute('aria-disabled');
+  }
+  trigger.removeAttribute('data-lock-prev-disabled');
+}
+
+export function getResultRows() {
+  return Array.from(resultHistory.querySelectorAll('.result-row'));
+}
+
 export function showResultModal(pokemon, verdict, gameMode, guessesLeft) {
   const verdictEl = resultModal.querySelector('#result-modal-verdict span');
   verdictEl.textContent = verdict;
@@ -279,12 +324,20 @@ export function showResultModal(pokemon, verdict, gameMode, guessesLeft) {
   scoreEl.textContent = '';
 
   const crackerImages = resultModal.querySelectorAll('.verdict-cracker-img');
-  if (verdict === '正解') {
+  const isVictory = verdict === '正解' || verdict === '勝利';
+  if (isVictory) {
     crackerImages.forEach(img => img.classList.remove('hidden'));
-    const guessesTaken = 10 - guessesLeft;
-    scoreEl.textContent = `${guessesTaken}回でクリア`;
+    if (gameMode === 'versus') {
+      scoreEl.textContent = 'おめでとうございます！';
+    } else {
+      const guessesTaken = 10 - guessesLeft;
+      scoreEl.textContent = `${guessesTaken}回でクリア`;
+    }
   } else {
     crackerImages.forEach(img => img.classList.add('hidden'));
+    if (gameMode === 'versus') {
+      scoreEl.textContent = '相手が正解しました。';
+    }
   }
 
   const setData = (field, value) => {
@@ -335,12 +388,36 @@ export function showResultModal(pokemon, verdict, gameMode, guessesLeft) {
 
   const profileDetails = resultModal.querySelector('.profile-left'); profileDetails.classList.add('pair-grid');
   const profileStats = resultModal.querySelector('.profile-right');
-  if (gameMode === 'classic' || gameMode === 'randomStart') {
+  
+  // ★修正: 対戦モード(versus)もクラシックモードと同じレイアウト(Stats非表示、Details全幅)にする
+  if (gameMode === 'classic' || gameMode === 'randomStart' || gameMode === 'versus') {
     profileStats.classList.add('hidden');
     profileDetails.style.gridColumn = '1 / -1';
   } else {
     profileStats.classList.remove('hidden');
     profileDetails.style.gridColumn = '';
+  }
+
+  const postGameActions = document.getElementById('post-game-actions');
+  if (postGameActions) postGameActions.classList.add('hidden');
+  const playAgainBtn = document.getElementById('post-game-play-again');
+  const backToMenuBtn = document.getElementById('post-game-back-to-menu');
+  if (postGameActions) {
+    if (gameMode === 'versus') {
+      postGameActions.classList.add('is-versus');
+    } else {
+      postGameActions.classList.remove('is-versus');
+    }
+  }
+  if (playAgainBtn) {
+    if (gameMode === 'versus') {
+      playAgainBtn.classList.add('hidden');
+    } else {
+      playAgainBtn.classList.remove('hidden');
+    }
+  }
+  if (backToMenuBtn) {
+    backToMenuBtn.textContent = gameMode === 'versus' ? 'ホームへ戻る' : 'モード選択へ';
   }
 
   resultModalOverlay.classList.remove('hidden');
@@ -350,6 +427,45 @@ export function clearResults() { resultHistory.innerHTML = ""; }
 export function blurGuessInput(){ if (guessInput) guessInput.blur(); }
 export function getGuessInputValue(){ return guessInput ? guessInput.value.trim() : ""; }
 export function clearGuessInput(){ if (guessInput) guessInput.value = ""; }
+
+export function showHintButton() {
+  if (hintButton) {
+    hintButton.classList.remove('hidden');
+  }
+}
+
+export function hideHintButton() {
+  if (hintButton) {
+    hintButton.classList.add('hidden');
+  }
+}
+
+export function setHintButtonEnabled(enabled) {
+  if (hintButton) {
+    hintButton.disabled = !enabled;
+    hintButton.classList.toggle('is-disabled', !enabled);
+    hintButton.setAttribute('aria-disabled', enabled ? 'false' : 'true');
+  }
+}
+
+export function renderMaskedVersusGuess(isMine = false) {
+  const row = document.createElement('div');
+  row.classList.add('result-row', 'result-row-classic', 'is-masked');
+  row.classList.add(isMine ? 'by-me' : 'by-opponent');
+
+  const header = document.createElement('div');
+  header.classList.add('masked-result-header');
+  header.innerHTML = '<span class="masked-question">???</span>';
+  row.appendChild(header);
+
+  const body = document.createElement('div');
+  body.classList.add('masked-result-body');
+  body.innerHTML = `<p>${isMine ? 'この回答は相手から秘匿されています' : '相手の回答は秘匿されています'}</p>`;
+  row.appendChild(body);
+
+  resultHistory.insertAdjacentElement('afterbegin', row);
+  return row;
+}
 
 
 let suggestionRequestToken = 0;
@@ -396,7 +512,6 @@ function handleInput() {
   }
 }
   
-// ===== モーダル共通 =====
 export function openModal(title, content, options = {}) {
 
   const { addHeaderDivider = true } = options;
@@ -426,7 +541,6 @@ function openHowToPlayModal() {
   </p>
 
   <div class="accordion" role="region" aria-label="遊び方の詳細">
-    <!-- 0) Poke Guesserとは -->
     <section class="accordion-item">
       <h4 class="accordion-header">
         <button class="accordion-trigger" aria-expanded="false" aria-controls="acc-panel-about" id="acc-btn-about">
@@ -448,7 +562,6 @@ function openHowToPlayModal() {
       </div>
     </section>
 
-    <!-- 1) ルール説明 -->
     <section class="accordion-item">
       <h4 class="accordion-header">
         <button class="accordion-trigger" aria-expanded="false" aria-controls="acc-panel-rules" id="acc-btn-rules">
@@ -469,7 +582,6 @@ function openHowToPlayModal() {
       </div>
     </section>
 
-    <!-- 2) 比較項目等の補足情報 -->
     <section class="accordion-item">
       <h4 class="accordion-header">
         <button class="accordion-trigger" aria-expanded="false" aria-controls="acc-panel-metrics" id="acc-btn-metrics">
@@ -499,12 +611,11 @@ function openHowToPlayModal() {
               <span class="legend legend-gray">灰</span>=不一致
             </li>
           </ul>
-          <p class="note">作品略称の例：RG/SwSh/ZA など</p>
+          <p class="note">作品略称の例：RG/剣盾/ZA など</p>
         </div>
       </div>
     </section>
 
-    <!-- 3) クラシックモードとは -->
     <section class="accordion-item">
       <h4 class="accordion-header">
         <button class="accordion-trigger" aria-expanded="false" aria-controls="acc-panel-classic" id="acc-btn-classic">
@@ -530,7 +641,6 @@ function openHowToPlayModal() {
       </div>
     </section>
 
-    <!-- 4) ランダムモードとは -->
     <section class="accordion-item">
       <h4 class="accordion-header">
         <button class="accordion-trigger" aria-expanded="false" aria-controls="acc-panel-random" id="acc-btn-random">
@@ -546,7 +656,6 @@ function openHowToPlayModal() {
       </div>
     </section>
 
-    <!-- 5) 種族値モードとは -->
     <section class="accordion-item">
       <h4 class="accordion-header">
         <button class="accordion-trigger" aria-expanded="false" aria-controls="acc-panel-stats" id="acc-btn-stats">
@@ -574,7 +683,7 @@ function openHowToPlayModal() {
   
 `;
 
-  openModal('遊び方', howToContent);
+  openModal('遊び方', howToPlayButton);
 
   const accRoot =
     document.querySelector('#modal .modal-body .accordion') ||
@@ -646,4 +755,4 @@ export function showRandomStartButton(){ if (randomStartButton) randomStartButto
 export function hideRandomStartButton(){ if (randomStartButton) randomStartButton.classList.add('hidden'); }
 export function hidePostGameActions(){ const el = document.getElementById('post-game-actions'); if (el) el.classList.add('hidden'); }
 export function showPostGameActions(){ const el = document.getElementById('post-game-actions'); if (el) el.classList.remove('hidden'); }
-export function hideSuggestions(){ const el = suggestionsBox; if (el) el.classList.add('hidden'); }  
+export function hideSuggestions(){ const el = suggestionsBox; if (el) el.classList.add('hidden'); }
