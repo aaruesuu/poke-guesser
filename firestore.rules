@@ -1,0 +1,61 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function roomData(roomId) {
+      return get(/databases/$(database)/documents/rooms/$(roomId)).data;
+    }
+
+    function isPlayer(roomId, playerId) {
+      return roomData(roomId).players[playerId] == true;
+    }
+
+    function isPlaying(roomId) {
+      return roomData(roomId).status == 'playing';
+    }
+
+    function isTurnOf(roomId, playerId) {
+      return roomData(roomId).turnOf == playerId;
+    }
+
+    function withinDeadline(roomId) {
+      let room = roomData(roomId);
+      return request.time <= room.turnDeadline + duration.value(1, 's');
+    }
+
+    match /rooms/{roomId} {
+      allow read: if isAuthenticated() && (
+        resource == null ||
+        resource.data.status == 'lobby' ||
+        resource.data.players[request.auth.uid] == true
+      );
+
+      allow create: if isAuthenticated() &&
+        request.auth.uid == request.resource.data.creatorId &&
+        request.resource.data.players is map &&
+        request.resource.data.players[request.auth.uid] == true;
+
+      allow update: if isAuthenticated() && (
+        (resource.data.status == 'lobby' && request.resource.data.players[request.auth.uid] == true) ||
+        (resource.data.players[request.auth.uid] == true)
+      );
+
+      allow delete: if isAuthenticated() && resource.data.creatorId == request.auth.uid;
+
+      match /guesses/{guessId} {
+        allow read: if isAuthenticated() && isPlayer(roomId, request.auth.uid);
+
+        allow create: if isAuthenticated() &&
+          isPlaying(roomId) &&
+          isPlayer(roomId, request.auth.uid) &&
+          request.auth.uid == request.resource.data.playerId &&
+          isTurnOf(roomId, request.auth.uid) &&
+          withinDeadline(roomId);
+      }
+    }
+  }
+}
