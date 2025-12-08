@@ -53,6 +53,7 @@ const DEBUG_FIXED_ID = 149;
 let gameMode = null;
 let guessesLeft = 10;
 let gameOver = false;
+let versusHistoryGuard = false;
 const allPokemonNames = Object.keys(allPokemonData);
 const finalEvolutionPokemonNames = allPokemonNames.filter((name) => finalEvoData[name]?.isFinalEvolution);
 let correctPokemon = null;
@@ -75,13 +76,17 @@ export const Handlers = {
   onGuess:        () => handleGuess(),
   onRandomStart:  () => handleRandomStart(),
   onPlayAgain:    () => startGame(gameMode || 'classic'),
-  onBackToMenu:   () => { resetGame(); switchScreen('mode-selection-screen'); },
+  onBackToMenu:   () => handleBackToMenu(),
   onHint:         () => handleHintRequest(),
 };
 
 function startGame(mode) {
   gameMode = mode;
 
+  if (gameMode !== 'versus') {
+    versusHistoryGuard = false;
+  }
+  
   if (globalThis._pgVersus && typeof globalThis._pgVersus.teardown === 'function') {
     globalThis._pgVersus.teardown();
   }
@@ -251,12 +256,26 @@ function endGame(isWin) {
   setHintButtonEnabled(false);
 }
 
+async function handleBackToMenu() {
+  if (gameMode === 'versus' && globalThis._pgVersus && typeof globalThis._pgVersus.confirmSurrenderIfNeeded === 'function') {
+    const ok = await globalThis._pgVersus.confirmSurrenderIfNeeded();
+    if (!ok) return;
+  }
+  resetGame();
+  switchScreen('mode-selection-screen');
+  versusHistoryGuard = false;
+}
+
 function startVersus() {
   gameMode = 'versus';
   resetGame();
   hideHintButton();
   setHintButtonEnabled(false);
   switchScreen('game-container');
+  if (!versusHistoryGuard) {
+    history.pushState({ mode: 'versus' }, '');
+    versusHistoryGuard = true;
+  }
   setGameTitle('対戦ロビー');
   setGameStatus('ルームを作成するか、コードを入力して参加してください');
   hideRandomStartButton();
@@ -320,3 +339,15 @@ function updateHintAvailability() {
   const hasAvailable = remaining.length > 0;
   setHintButtonEnabled(hasAvailable && !gameOver);
 }
+
+window.addEventListener('popstate', async () => {
+  if (!versusHistoryGuard || gameMode !== 'versus') return;
+  const ok = await (globalThis._pgVersus?.confirmSurrenderIfNeeded?.() ?? true);
+  if (!ok) {
+    history.pushState({ mode: 'versus' }, '');
+    return;
+  }
+  versusHistoryGuard = false;
+  resetGame();
+  switchScreen('mode-selection-screen');
+});
