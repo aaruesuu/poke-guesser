@@ -50,6 +50,7 @@ const postGamePlayAgainButton = document.getElementById('post-game-play-again');
 const postGameBackToMenuButton = document.getElementById('post-game-back-to-menu');
 const gameTitle = document.getElementById('game-title');
 const gameStatus = document.getElementById('game-status');
+const turnsRemaining = document.getElementById('turns-remaining');
 
 let resultAccordionSeq = 0;
 
@@ -147,6 +148,16 @@ export function switchScreen(targetScreen) {
 export function setGameStatus(text) { gameStatus.textContent = text || ""; }
 export function setGameTitle(text) { gameTitle.textContent = text || ""; }
 export function updateStatusUI(text) { gameStatus.textContent = text || ""; }
+export function setTurnsRemaining(text) {
+  if (!turnsRemaining) return;
+  if (!text) {
+    turnsRemaining.textContent = "";
+    turnsRemaining.classList.add('hidden');
+    return;
+  }
+  turnsRemaining.textContent = text;
+  turnsRemaining.classList.remove('hidden');
+}
 
 export function hideResultsArea() {
   if (resultsArea?.style) {
