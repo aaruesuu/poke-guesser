@@ -12,6 +12,7 @@ import {
   hidePostGameActions,
   showResultModal,
   renderMaskedVersusGuess,
+  setTurnsRemaining,
 } from "./dom.js";
 
 // Firebase Imports
@@ -26,7 +27,10 @@ import {
   onSnapshot, serverTimestamp, collection, addDoc, query, orderBy
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const V90 = 90 * 1000;
+const TURN_DURATION_MS = 30 * 1000;
+const INACTIVITY_TIMEOUT_MS = 4 * 60 * 1000;
+const ROOM_EXPIRY_MS = 60 * 60 * 1000;
+const MAX_TURNS = 20;
 
 const DEBUG_FIXED_ANSWER = false;
 
@@ -86,6 +90,8 @@ const state = {
   resultModalShown: false,
   holdHideBanner: false,
   showingOpponentModal: false,
+  beforeUnloadHandler: null,
+  pageHideHandler: null,
 };
 
 function fmtClock(ms) {
@@ -107,6 +113,11 @@ function chooseAnswerBySeed(seed) {
   x = (a * x + c) % m;
   const idx = x % names.length;
   return allPokemonData[names[idx]];
+}
+
+function pickRandomPokemon() {
+  const names = Object.keys(allPokemonData);
+  return allPokemonData[names[Math.floor(Math.random() * names.length)]];
 }
 
 function ensureLobbyRoot() {
@@ -160,6 +171,39 @@ function startInterval() {
 }
 function stopInterval() {
   if (state.interval) { clearInterval(state.interval); state.interval = null; }
+}
+
+function installExitGuards() {
+  if (!state.beforeUnloadHandler) {
+    state.beforeUnloadHandler = (e) => {
+      if (state.roomData && state.roomData.status === "playing") {
+        e.preventDefault();
+        e.returnValue = "";
+        surrenderMatch().catch(() => {});
+      }
+    };
+    window.addEventListener("beforeunload", state.beforeUnloadHandler);
+  }
+
+  if (!state.pageHideHandler) {
+    state.pageHideHandler = () => {
+      if (state.roomData && state.roomData.status === "playing") {
+        surrenderMatch().catch(() => {});
+      }
+    };
+    window.addEventListener("pagehide", state.pageHideHandler);
+  }
+}
+
+function removeExitGuards() {
+  if (state.beforeUnloadHandler) {
+    window.removeEventListener("beforeunload", state.beforeUnloadHandler);
+    state.beforeUnloadHandler = null;
+  }
+  if (state.pageHideHandler) {
+    window.removeEventListener("pagehide", state.pageHideHandler);
+    state.pageHideHandler = null;
+  }
 }
 
 function ensureTurnModal(type) {
@@ -318,10 +362,15 @@ function onTick() {
   if (!d) return;
 
   if (d.status === "playing") {
-    const left = (d.endsAt || 0) - now();
+    const left = (d.turnDeadline?.toMillis ? d.turnDeadline.toMillis() : d.turnDeadline || 0) - now();
     const mine = d.turnOf === state.me;
     setGameStatus(`${mine ? "あなた" : "相手"}の番です（残り ${fmtClock(left)}）`);
-    if (left <= 0 && (now() - (state.lastAdvanceAttempt || 0) > 1500)) {
+    const guessInput = document.getElementById("guess-input");
+    const guessButton = document.getElementById("guess-button");
+    const expired = left <= 0;
+    if (guessInput) guessInput.disabled = expired || !mine;
+    if (guessButton) guessButton.disabled = expired || !mine;
+    if (expired && (now() - (state.lastAdvanceAttempt || 0) > 1500)) {
       state.lastAdvanceAttempt = now();
       forceAdvanceTurnIfExpired().catch(()=>{});
     }
@@ -341,6 +390,13 @@ function opponentId(playersMap, me) {
   return ids.find(id => id !== me) || null;
 }
 
+function getOpponentUid(roomData, uid) {
+  if (!roomData) return null;
+  if (roomData.hostUid === uid) return roomData.guestUid || null;
+  if (roomData.guestUid === uid) return roomData.hostUid || null;
+  return opponentId(roomData.players || {}, uid);
+}
+
 async function maybeStartMatch(roomRef) {
   await runTransaction(ensureDB(), async (tx) => {
     const rs = await tx.get(roomRef);
@@ -355,8 +411,19 @@ async function maybeStartMatch(roomRef) {
     const first = playerIds[Math.floor(Math.random() * playerIds.length)];
 
     const seed = Math.floor(Math.random() * 2**31);
-    const endsAt = now() + V90;
-    tx.update(roomRef, { status: "playing", seed, turnOf: first, turnNumber: 1, endsAt });
+    tx.update(roomRef, {
+      status: "playing",
+      seed,
+      turnOf: first,
+      turnNumber: 1,
+      turnCount: 0,
+      turnDeadline: new Date(Date.now() + TURN_DURATION_MS),
+      maxTurns: data.maxTurns || MAX_TURNS,
+      winner: null,
+      finishedReason: null,
+      lastActionAt: serverTimestamp(),
+      lastActionBy: first,
+    });
   });
 }
 
@@ -375,6 +442,7 @@ function listenRoom(onState, onGuess) {
       hideResultsArea();
       setGameTitle("対戦ロビー");
       setGameStatus("ホストの準備を待っています…");
+      setTurnsRemaining("");
       state.roomData = null;
       return;
     }
@@ -397,7 +465,7 @@ function listenRoom(onState, onGuess) {
                 state.correct = chooseAnswerBySeed(data.seed);
                 state.currentSeed = data.seed;
                 // seedが変わったら履歴などの状態もクリアするのが安全
-                if (prevStatus === "ended" || prevStatus === "lobby") {
+                if (prevStatus === "finished" || prevStatus === "lobby") {
                     state.resultModalShown = false;
                 }
             }
@@ -438,9 +506,12 @@ function listenRoom(onState, onGuess) {
       hideResultsArea();
       setGameTitle("対戦ロビー");
       setGameStatus(playerCount >= 2 ? "準備中…" : "相手の参加を待っています…");
+      setTurnsRemaining("");
+      removeExitGuards();
     }
 
     if (data.status === "playing") {
+      installExitGuards();
       hideLobby();
       hideRandomStartButton();
       showInputArea();
@@ -450,9 +521,11 @@ function listenRoom(onState, onGuess) {
       
       setGameTitle("対戦モード");
 
-      const left = (data.endsAt || 0) - now();
+      const left = (data.turnDeadline?.toMillis ? data.turnDeadline.toMillis() : data.turnDeadline || 0) - now();
       const mine = data.turnOf === state.me;
       setGameStatus(`${mine ? "あなた" : "相手"}の番です（残り ${fmtClock(left)}）`);
+      const remainingTurns = Math.max(0, (data.maxTurns || MAX_TURNS) - (data.turnCount || 0));
+      setTurnsRemaining(`残りターン数：${remainingTurns}`);
 
       const currentTurn = data.turnNumber || 1;
       
@@ -474,18 +547,23 @@ function listenRoom(onState, onGuess) {
       try { startInterval && startInterval(); } catch {}
     }
 
-    if (data.status === "ended") {
+    if (data.status === "finished") {
       try { stopInterval && stopInterval(); } catch {}
-      const win = data.winner === state.me;
+      removeExitGuards();
+      const winRole = data.winner;
+      const win = (winRole === "host" && state.me === data.hostUid) || (winRole === "guest" && state.me === data.guestUid);
+      const draw = winRole === "draw";
       setGameTitle("対戦モード");
+      setTurnsRemaining("");
       showResultsArea();
-      setGameStatus(`対戦終了：${win ? "Win" : "Lose"}`);
+      const reason = data.finishedReason === "max_turns" ? "20ターン経過のため引き分け" : win ? "Win" : draw ? "Draw" : "Lose";
+      setGameStatus(`対戦終了：${reason}`);
       hideTurnModal();
       state.turnNoticeShownFor = null;
       hideInputArea();
       
       if (!state.resultModalShown && state.correct) {
-        const verdict = win ? "勝利" : "敗北";
+        const verdict = draw ? "引き分け" : win ? "勝利" : "敗北";
         showResultModal(state.correct, verdict, "versus", 0);
         state.resultModalShown = true;
       }
@@ -527,53 +605,59 @@ function listenRoom(onState, onGuess) {
 
 
 async function postGuess(guessName) {
-  const rs = await getDoc(doc(ensureDB(), "rooms", state.roomId));
-  if (!rs.exists()) return;
-  const data = rs.data();
-  if (data.status !== "playing") return;
-  if (data.turnOf !== state.me) return;
-
   const guessed = Object.values(allPokemonData).find(p => p.name === guessName);
   if (!guessed) return;
 
-  const isCorrect = (state.correct && guessed.id === state.correct.id);
-  const turnNumber = data.turnNumber || 1;
-  
-  await addDoc(collection(ensureDB(), "rooms", state.roomId, "guesses"), {
-    by: state.me,
-    playerId: state.me, // For rules
-    name: guessed.name,
-    id: guessed.id,
-    isCorrect,
-    turnNumber,
-    ts: serverTimestamp()
+  const roomRef = doc(ensureDB(), "rooms", state.roomId);
+  const guessRef = doc(collection(roomRef, "guesses"));
+
+  await runTransaction(ensureDB(), async (tx) => {
+    const s = await tx.get(roomRef);
+    if (!s.exists()) return;
+    const r = s.data();
+    if (r.status !== "playing") return;
+    if (r.turnOf !== state.me) return;
+
+    const deadlineMs = r.turnDeadline?.toMillis ? r.turnDeadline.toMillis() : r.turnDeadline || 0;
+    if (deadlineMs && now() > deadlineMs + 1000) return; // Firestore rules will enforce too
+
+    const isCorrect = (state.correct && guessed.id === state.correct.id);
+    const turnNumber = r.turnNumber || 1;
+    const nextTurnCount = (r.turnCount || 0) + 1;
+    const updates = {
+      turnCount: nextTurnCount,
+      lastActionAt: serverTimestamp(),
+      lastActionBy: state.me,
+    };
+
+    if (isCorrect) {
+      updates.status = "finished";
+      updates.winner = r.hostUid === state.me ? "host" : "guest";
+      updates.finishedReason = "normal";
+    } else if (nextTurnCount >= (r.maxTurns || MAX_TURNS)) {
+      updates.status = "finished";
+      updates.winner = "draw";
+      updates.finishedReason = "max_turns";
+    } else {
+      const other = getOpponentUid(r, state.me) || opponentId(r.players, state.me) || state.me;
+      updates.turnOf = other;
+      updates.turnNumber = (r.turnNumber || 1) + 1;
+      updates.turnDeadline = new Date(Date.now() + TURN_DURATION_MS);
+    }
+
+    tx.set(guessRef, {
+      by: state.me,
+      playerId: state.me,
+      name: guessed.name,
+      id: guessed.id,
+      isCorrect,
+      turnNumber,
+      ts: serverTimestamp(),
+    });
+    tx.update(roomRef, updates);
   });
 
-  if (isCorrect) {
-    const roomRef = doc(ensureDB(), "rooms", state.roomId);
-    await runTransaction(ensureDB(), async (tx) => {
-      const s = await tx.get(roomRef);
-      const r = s.data();
-      if (r.status === "playing") {
-        tx.update(roomRef, { status: "ended", winner: state.me, endedAt: serverTimestamp() });
-      }
-    });
-  } else {
-    const roomRef = doc(ensureDB(), "rooms", state.roomId);
-    await runTransaction(ensureDB(), async (tx) => {
-      const s = await tx.get(roomRef);
-      if (!s.exists()) return;
-      const r = s.data();
-      if (r.status !== "playing") return;
-      if (r.turnOf !== state.me) return;
-      
-      const other = opponentId(r.players, state.me) || state.me;
-      tx.update(roomRef, {
-        turnOf: other,
-        turnNumber: (r.turnNumber || 1) + 1,
-        endsAt: now() + V90
-      });
-    });
+  if (!state.roomData || state.roomData.turnOf === state.me) {
     showOpponentModal();
   }
 }
@@ -586,14 +670,69 @@ async function forceAdvanceTurnIfExpired() {
     if (!rs.exists()) return;
     const data = rs.data();
     if (data.status !== "playing") return;
-    if (now() <= (data.endsAt || 0)) return;
+
+    const deadlineMs = data.turnDeadline?.toMillis ? data.turnDeadline.toMillis() : data.turnDeadline || 0;
+    const inactiveMs = data.lastActionAt?.toMillis ? data.lastActionAt.toMillis() : data.lastActionAt || 0;
+    const nowMs = now();
+
+    if (inactiveMs && nowMs - inactiveMs > INACTIVITY_TIMEOUT_MS) {
+      const winnerRole = data.hostUid === state.me ? "host" : data.guestUid === state.me ? "guest" : null;
+      if (!winnerRole) return;
+      tx.update(roomRef, {
+        status: "finished",
+        winner: winnerRole,
+        finishedReason: "timeout",
+        lastActionAt: serverTimestamp(),
+        lastActionBy: state.me,
+      });
+      return;
+    }
+
+    if (deadlineMs && nowMs <= deadlineMs) return;
+
+    const nextTurnCount = (data.turnCount || 0) + 1;
+    const turnNumber = data.turnNumber || 1;
     const playersMap = data.players || {};
-    const other = opponentId(playersMap, data.turnOf) || data.turnOf;
-    tx.update(roomRef, {
-      turnOf: other,
-      turnNumber: (data.turnNumber || 1) + 1,
-      endsAt: now() + V90
-    });
+    const other = getOpponentUid(data, data.turnOf) || opponentId(playersMap, data.turnOf) || data.turnOf;
+    const maxTurns = data.maxTurns || MAX_TURNS;
+    const autoGuess = pickRandomPokemon();
+    const isCorrect = state.correct && autoGuess.id === state.correct.id;
+
+    const updates = {
+      turnCount: nextTurnCount,
+      lastActionAt: serverTimestamp(),
+      lastActionBy: data.turnOf,
+    };
+
+    if (isCorrect) {
+      updates.status = "finished";
+      updates.winner = data.hostUid === data.turnOf ? "host" : "guest";
+      updates.finishedReason = "normal";
+    } else if (nextTurnCount >= maxTurns) {
+      updates.status = "finished";
+      updates.winner = "draw";
+      updates.finishedReason = "max_turns";
+    } else {
+      updates.turnOf = other;
+      updates.turnNumber = turnNumber + 1;
+      updates.turnDeadline = new Date(Date.now() + TURN_DURATION_MS);
+    }
+
+    if (data.turnOf) {
+      const guessRef = doc(collection(roomRef, "guesses"));
+      tx.set(guessRef, {
+        by: data.turnOf,
+        playerId: data.turnOf,
+        name: autoGuess.name,
+        id: autoGuess.id,
+        isCorrect,
+        turnNumber,
+        autoSkip: true,
+        ts: serverTimestamp(),
+      });
+    }
+
+    tx.update(roomRef, updates);
   });
 }
 
@@ -754,10 +893,13 @@ async function claimRoomAsync(code) {
         // Add self if not exists
         if (!playersMap[me]) {
             playersMap[me] = true;
-            tx.update(roomRef, {
-              players: playersMap,
-            });
         }
+
+        const updates = { players: playersMap };
+        if (!data.hostUid) updates.hostUid = data.creatorId || me;
+        if (!data.guestUid && me !== updates.hostUid) updates.guestUid = me;
+        if (!data.maxTurns) updates.maxTurns = MAX_TURNS;
+        tx.update(roomRef, updates);
       } else {
         // Map structure for players
         const playersMap = { [me]: true };
@@ -765,8 +907,16 @@ async function claimRoomAsync(code) {
           code,
           status: "lobby",
           creatorId: me,
+          hostUid: me,
+          guestUid: null,
           players: playersMap,
           createdAt: serverTimestamp(),
+          maxTurns: MAX_TURNS,
+          turnCount: 0,
+          winner: null,
+          finishedReason: null,
+          lastActionAt: serverTimestamp(),
+          lastActionBy: me,
         });
       }
     });
@@ -797,10 +947,13 @@ function teardown() {
     root.parentNode.removeChild(root);
   }
 
+  try { setTurnsRemaining(""); } catch {}
+
   const skillBar = document.getElementById('versus-skill-bar');
   if (skillBar) skillBar.classList.add('hidden');
   
   hideTurnModal();
+  removeExitGuards();
 
   state.turnNoticeShownFor = null;
   state.resultModalShown = false;
@@ -814,5 +967,38 @@ function teardown() {
   state.currentSeed = null; // ★追加: teardownでもリセット
 }
 
-export const PGVersus = { boot, handleGuess, forceAdvanceTurnIfExpired, teardown };
+async function surrenderMatch() {
+  if (!state.roomId) return;
+  const roomRef = doc(ensureDB(), "rooms", state.roomId);
+  await runTransaction(ensureDB(), async (tx) => {
+    const snap = await tx.get(roomRef);
+    if (!snap.exists()) return;
+    const data = snap.data();
+    if (data.status !== "playing") return;
+    const myRole = data.hostUid === state.me ? "host" : data.guestUid === state.me ? "guest" : null;
+    const opponentRole = myRole === "host" ? "guest" : "host";
+    tx.update(roomRef, {
+      status: "finished",
+      winner: opponentRole,
+      finishedReason: "surrender",
+      lastActionAt: serverTimestamp(),
+      lastActionBy: state.me,
+    });
+  });
+}
+
+async function confirmSurrenderIfNeeded() {
+  const playing = state.roomData && state.roomData.status === "playing";
+  if (!playing) return true;
+  const ok = window.confirm("この対戦を降参（負け）として終了しますか？");
+  if (!ok) return false;
+  try {
+    await surrenderMatch();
+  } catch (e) {
+    console.warn("[Versus] surrender failed", e);
+  }
+  return true;
+}
+
+export const PGVersus = { boot, handleGuess, forceAdvanceTurnIfExpired, teardown, confirmSurrenderIfNeeded };
 globalThis._pgVersus = PGVersus;
