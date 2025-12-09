@@ -27,7 +27,7 @@ import {
   onSnapshot, serverTimestamp, collection, addDoc, query, orderBy
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const TURN_DURATION_MS = 30 * 1000;
+const TURN_DURATION_MS = 60 * 1000;
 const INACTIVITY_TIMEOUT_MS = 4 * 60 * 1000;
 const ROOM_EXPIRY_MS = 60 * 60 * 1000;
 const MAX_TURNS = 20;
@@ -364,7 +364,8 @@ function onTick() {
   if (d.status === "playing") {
     const left = (d.turnDeadline?.toMillis ? d.turnDeadline.toMillis() : d.turnDeadline || 0) - now();
     const mine = d.turnOf === state.me;
-    setGameStatus(`${mine ? "あなた" : "相手"}の番です（残り ${fmtClock(left)}）`);
+    const remainingTurns = Math.max(0, (d.maxTurns || MAX_TURNS) - (d.turnCount || 0));
+    setGameStatus(`${mine ? "あなた" : "相手"}の番です（残り時間：${fmtClock(left)}／残りターン数：${remainingTurns}）`);
     const guessInput = document.getElementById("guess-input");
     const guessButton = document.getElementById("guess-button");
     const expired = left <= 0;
@@ -523,9 +524,8 @@ function listenRoom(onState, onGuess) {
 
       const left = (data.turnDeadline?.toMillis ? data.turnDeadline.toMillis() : data.turnDeadline || 0) - now();
       const mine = data.turnOf === state.me;
-      setGameStatus(`${mine ? "あなた" : "相手"}の番です（残り ${fmtClock(left)}）`);
       const remainingTurns = Math.max(0, (data.maxTurns || MAX_TURNS) - (data.turnCount || 0));
-      setTurnsRemaining(`残りターン数：${remainingTurns}`);
+      setGameStatus(`${mine ? "あなた" : "相手"}の番です（残り時間：${fmtClock(left)}／残りターン数：${remainingTurns}）`);
 
       const currentTurn = data.turnNumber || 1;
       
