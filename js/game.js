@@ -147,6 +147,11 @@ function resetGame() {
   showInputArea();
   hidePostGameActions();
 
+  const guessInput = document.getElementById('guess-input');
+  const guessButton = document.getElementById('guess-button');
+  if (guessInput) guessInput.disabled = false;
+  if (guessButton) guessButton.disabled = false;
+
   const playAgainBtn = document.getElementById('post-game-play-again');
   if (playAgainBtn) playAgainBtn.classList.remove('hidden');
   const backToMenuBtn = document.getElementById('post-game-back-to-menu');
