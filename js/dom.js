@@ -347,7 +347,9 @@ export function showResultModal(pokemon, verdict, gameMode, guessesLeft) {
   } else {
     crackerImages.forEach(img => img.classList.add('hidden'));
     if (gameMode === 'versus') {
-      scoreEl.textContent = '相手が正解しました。';
+      scoreEl.textContent = verdict === '引き分け'
+        ? '回答数が上限に達しました。'
+        : '相手が正解しました。';
     }
   }
 
@@ -694,7 +696,7 @@ function openHowToPlayModal() {
   
 `;
 
-  openModal('遊び方', howToPlayButton);
+openModal('遊び方', howToContent);
 
   const accRoot =
     document.querySelector('#modal .modal-body .accordion') ||
