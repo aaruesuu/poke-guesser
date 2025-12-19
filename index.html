@@ -12,7 +12,9 @@
   </head>
   <body>
     <header id="app-header">
-      <h1 class="logo">Poke <span class="logo-accent">Guesser</span></h1>
+      <button id="logo-home" class="logo" type="button" aria-label="HOMEへ戻る">
+        Poke <span class="logo-accent">Guesser</span>
+      </button>
       <button id="hamburger-menu" aria-label="メニューを開く">
         <span></span>
         <span></span>
@@ -32,11 +34,8 @@
         <div id="mode-selection-screen">
           <h2 id="selection-title">モードを選んでください</h2>
           <div class="mode-selection-container">
-            <button class="mode-button classic-button" id="classic-mode-button">
-              <h3>クラシックモード</h3>
-            </button>
             <button class="mode-button random-button" id="random-start-mode-button">
-              <h3>ランダムモード</h3>
+              <h3>ノーマルモード</h3>
             </button>
             <button class="mode-button stats-button" id="base-stats-mode-button">
               <h3>種族値モード</h3>
