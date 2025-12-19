@@ -77,8 +77,14 @@ body {
   position: relative;
 }
 .logo {
+  background: none;
+  border: none;
   color: var(--c-white);
+  cursor: pointer;
+  font-family: inherit;
   font-size: 1.2rem;
+  font-weight: 700;
+  padding: 0;
   text-shadow: 2px 2px 0 var(--c-border);
 }
 .logo-accent {
@@ -1573,6 +1579,11 @@ body {
   background: #FCEAEA;
   color: #C41E3A;
   border-color: #C41E3A;
+}
+.result-row.by-neutral .accordion-trigger,
+.result-row.by-neutral .result-header {
+  background-color: #555;
+  border-color: #555;
 }
 .result-row.by-opponent .accordion-trigger,
 .result-row.by-opponent .result-header {
