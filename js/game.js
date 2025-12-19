@@ -69,13 +69,12 @@ export function initGame() {
 }
 
 export const Handlers = {
-  onStartClassic: () => startGame('classic'),
   onStartRandom:  () => startGame('randomStart'),
   onStartStats:   () => startGame('stats'),
   onStartVersus:  () => startVersus(),
   onGuess:        () => handleGuess(),
   onRandomStart:  () => handleRandomStart(),
-  onPlayAgain:    () => startGame(gameMode || 'classic'),
+  onPlayAgain:    () => startGame(gameMode || 'randomStart'),
   onBackToMenu:   () => handleBackToMenu(),
   onHint:         () => handleHintRequest(),
 };
@@ -213,7 +212,7 @@ function handleGuess() {
 
   if (isCorrect) {
     endGame(true);
-  } else if ((gameMode === 'classic' || gameMode === 'randomStart') && guessesLeft <= 0) {
+  } else if (gameMode === 'randomStart' && guessesLeft <= 0) {
     endGame(false);
   }
 
@@ -224,8 +223,10 @@ function handleGuess() {
 
 function handleRandomStart() {
   let randomGuess;
+  const candidates = getEligiblePokemonNames();
+  const pool = candidates.length ? candidates : allPokemonNames;
   do {
-    const randomName = allPokemonNames[Math.floor(Math.random() * allPokemonNames.length)];
+    const randomName = pool[Math.floor(Math.random() * pool.length)];
     randomGuess = allPokemonData[randomName];
   } while (isCorrectAnswer(randomGuess, correctPokemon));
 
@@ -242,14 +243,16 @@ function setupUIForMode() {
   hideRandomStartButton();
   showInputArea();
 
-  if (gameMode === 'classic' || gameMode === 'scoreAttack') {
-    setGameTitle(gameMode === 'classic' ? 'クラシックモード' : 'スコアアタック');
-  } else if (gameMode === 'stats') {
+  if (gameMode === 'stats') {
     setGameTitle('種族値モード');
-  } else if (gameMode === 'randomStart') {
-    setGameTitle('ランダムモード');
     showRandomStartButton();
     hideInputArea();
+  } else if (gameMode === 'randomStart') {
+    setGameTitle('ノーマルモード');
+    showRandomStartButton();
+    hideInputArea();
+  } else {
+    setGameTitle('ノーマルモード');
   }
   setGameStatus('');
   updateHintAvailability();
@@ -281,7 +284,7 @@ function startVersus() {
     history.pushState({ mode: 'versus' }, '');
     versusHistoryGuard = true;
   }
-  setGameTitle('対戦ロビー');
+  setGameTitle('対戦モード');
   setGameStatus('ルームを作成するか、コードを入力して参加してください');
   hideRandomStartButton();
   hideInputArea();
