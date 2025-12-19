@@ -494,8 +494,16 @@ function handleInput() {
 
   const inputTextKana = normalizePokemonName(inputText);
   const suggestions = allPokemonNames
-    .filter(name => normalizePokemonName(name).startsWith(inputTextKana))
-    .slice(0, 100);
+  .map(name => {
+    const normalizedName = normalizePokemonName(name);
+    const matchIndex = normalizedName.indexOf(inputTextKana);
+    if (matchIndex === -1) return null;
+    return { name, matchIndex, length: normalizedName.length };
+  })
+  .filter(Boolean)
+  .sort((a, b) => a.matchIndex - b.matchIndex || a.length - b.length || a.name.localeCompare(b.name, "ja"))
+  .slice(0, 100)
+  .map(({ name }) => name);
 
   if (currentToken !== suggestionRequestToken) return;
 
