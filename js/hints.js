@@ -81,7 +81,7 @@ function safeStat(pokemon, key) {
 
 function normalizeMode(mode) {
   if (mode === "stats") return "stats";
-  return "classic";
+  return "default";
 }
 
 function collectDefinitions(mode) {
