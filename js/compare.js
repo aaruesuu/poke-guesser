@@ -62,7 +62,7 @@ export function comparePokemon(guessed, correct) {
     return { class: 'bg-gray', symbol: cmp.symbol, symbolClass: cmp.symbolClass };
   };
 
-  // --- クラシック/ランダム用の比較結果 ---
+  // --- ノーマルモード/対戦モード用の比較結果 ---
   const result = {};
 
   // 1) 世代/作品の比較
