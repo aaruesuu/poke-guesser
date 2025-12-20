@@ -42,6 +42,17 @@ body {
   font-size: 16px;
   overflow-x: hidden;
 }
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 #theme-container {
   background-color: var(--c-main-bg);
   border: 5px solid var(--c-border);
@@ -177,6 +188,129 @@ body {
   flex-direction: column;
   gap: 1.5rem;
 }
+
+#settings-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  justify-content: flex-start;
+}
+
+#settings-title {
+  font-family: "M PLUS 1p", "Zen Maru Gothic", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", sans-serif;
+  font-size: clamp(1.1rem, 1.2vw + 0.6rem, 1.6rem);
+  color: var(--c-text);
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+.settings-description {
+  font-family: "Zen Maru Gothic", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", sans-serif;
+  text-align: center;
+  margin-bottom: -0.9rem;
+}
+.settings-description-subtle {
+  font-family: "Zen Maru Gothic", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", sans-serif;
+  font-size: small;
+  text-align: center;
+}
+
+#settings-select-all {
+  padding: 0.5rem;
+}
+#settings-clear-all{
+  padding: 0.5rem;
+}
+
+.settings-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.settings-summary {
+  font-family: "Zen Maru Gothic", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", sans-serif;
+  font-size: 0.95rem;
+  text-align: center;
+  margin-top: -0.4rem;
+}
+
+.settings-option-container {
+  background: var(--c-black-op10);
+  border: 2px solid var(--c-border);
+  border-radius: 8px;
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
+}
+
+.settings-section {
+  border-bottom: 1px dashed var(--c-border);
+  padding-bottom: 0.75rem;
+}
+
+.settings-section:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.settings-section h3 {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.settings-option-list {
+  display: grid;
+  gap: 0.4rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.settings-option {
+  align-items: center;
+  background: var(--c-white);
+  border: 1px solid var(--c-border);
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  gap: 0.4rem;
+  padding: 0.55rem 0.6rem;
+  user-select: none;
+}
+
+.settings-option input[type="checkbox"] {
+  height: 1.1rem;
+  width: 1.1rem;
+}
+#settings-save-button {
+  background-color: var(--c-white);
+  border: 3px solid var(--c-border);
+  border-radius: 50px;
+  color: var(--c-text);
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 0.7rem 1.2rem;
+  width: 100%;
+}
+#settings-cancel-button {
+  background-color: var(--c-white);
+  border: 3px solid var(--c-border);
+  border-radius: 50px;
+  color: var(--c-text);
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 0.7rem 1.2rem;
+  width: 100%;
+}
+
+.settings-footer {
+  display: flex;
+  flex-direction: row;
+  margin: auto 0;
+  gap: 0.6rem;
+}
 .mode-button {
   border: 4px solid var(--c-border);
   border-radius: 8px;
@@ -309,6 +443,9 @@ body {
   margin-bottom: 0.5rem;
   padding: 0.8rem;
   width: 100%;
+}
+.action-button.secondary {
+  background: #f0f0f0;
 }
 #suggestions-box {
   background-color: var(--c-white);
@@ -557,6 +694,24 @@ body {
 #verdict-cracker-img-right { 
   transform: scaleX(-1);
 }
+.result-hints {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  padding: 0.75rem 0.9rem;
+  margin-top: 1rem;
+}
+.result-hints-label {
+  font-weight: 800;
+  margin: 0;
+  font-size: 0.95rem;
+}
+.result-hints-list {
+  margin: 0.35rem 0 0;
+  font-weight: 700;
+  word-break: break-all;
+  text-align: center;
+}
 #hint-modal-overlay {
   position: fixed;
   inset: 0;
@@ -748,8 +903,13 @@ body {
   align-items: center;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  display: inline-flex;
+  flex-direction: row;
+  gap: 0.5rem;
+  justify-content: center;
   margin-top: 2rem;
+  flex-wrap: wrap;
+  width: 100%;
 }
 .sub-button {
   background-color: #f0f0f0;
@@ -757,13 +917,37 @@ body {
   border-radius: 6px;
   font-size: 0.9rem;
   font-weight: 700;
-  max-width: 300px;
-  padding: 0.7rem;
-  width: 40%;
+  max-width: 320px;
+  width: auto;
+  min-width: 190px;
+  text-align: center;
+}
+.sub-button.subtle {
+  background-color: #fff;
+  border-style: dashed;
 }
 .sub-button:active {
   box-shadow: none;
   transform: translate(3px, 3px);
+}
+.settings-button {
+  background-color: var(--c-white);
+  border-radius: 0 50% 50% 0;
+  height: 50px;
+  min-width: 0;
+  width: 50px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.settings-button img {
+  height: 60%;
+  width: 60%;
+  object-fit: contain;
+}
+.settings-button:active {
+  transform: translate(2px, 2px);
+  box-shadow: none;
 }
 .result-score-text {
   color: var(--c-accent);
@@ -824,6 +1008,37 @@ body {
     Zen Maru Gothic,
     sans-serif;
   line-height: 1.75;
+}
+.updates-list {
+  display: grid;
+  gap: 0.65rem;
+}
+.updates-item {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 0.75rem 0.85rem;
+}
+.updates-date {
+  margin: 0 0 0.25rem;
+  font-weight: bold;
+}
+.updates-body {
+  margin: 0;
+}
+.updates-screen {
+  background: rgba(255, 255, 255, 0.8);
+  border: 3px solid var(--c-border);
+  border-radius: 10px;
+  padding: 1.1rem 1.2rem;
+  box-shadow: inset 2px 2px 0 rgba(0, 0, 0, 0.1);
+}
+.updates-screen h2 {
+  margin-bottom: 0.4rem;
+  font-size: 1.5rem;
+}
+.updates-intro {
+  margin: 0 0 0.8rem;
+  font-weight: bold;
 }
 .modal-body .lead {
   margin-bottom: 0.8rem;
@@ -900,7 +1115,7 @@ body {
   appearance: none;
   background: var(--c-white);
   border: 3px solid var(--btn-color);
-  border-radius: 50px;
+  border-radius: 50px 0 0 50px;
   color: var(--btn-color);
   cursor: pointer;
   letter-spacing: 0.02em;
