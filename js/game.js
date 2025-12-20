@@ -40,9 +40,13 @@ import {
 
 import {
   requestHint,
-  getHintKeysForMode
+  getHintKeysForMode,
+  getHintLabelsByKeys,
 } from "./hints.js";
 
+import {
+  filterPokemonNamesByDebut,
+} from "./settings.js";
 
 // === 正解ポケモン固定 ===
 const DEBUG_FIXED_ANSWER = false;
@@ -55,7 +59,6 @@ let guessesLeft = 10;
 let gameOver = false;
 let versusHistoryGuard = false;
 const allPokemonNames = Object.keys(allPokemonData);
-const finalEvolutionPokemonNames = allPokemonNames.filter((name) => finalEvoData[name]?.isFinalEvolution);
 let correctPokemon = null;
 let answeredPokemonNames = new Set();
 let correctCount = 0;
@@ -105,10 +108,14 @@ function startGame(mode) {
 }
 
 function getEligiblePokemonNames() {
+  const finalEvolutionPokemonNames = allPokemonNames.filter((name) => finalEvoData[name]?.isFinalEvolution);
   if (gameMode === 'stats') {
-    return finalEvolutionPokemonNames.length ? finalEvolutionPokemonNames : allPokemonNames;
+    const base = finalEvolutionPokemonNames.length ? finalEvolutionPokemonNames : allPokemonNames;
+    const filtered = filterPokemonNamesByDebut(base);
+    return filtered.length ? filtered : base;
   }
-  return allPokemonNames;
+  const filtered = filterPokemonNamesByDebut(allPokemonNames);
+  return filtered.length ? filtered : allPokemonNames;
 }
 
 function initRound() {
@@ -223,8 +230,9 @@ function handleGuess() {
 
 function handleRandomStart() {
   let randomGuess;
-  const candidates = getEligiblePokemonNames();
-  const pool = candidates.length ? candidates : allPokemonNames;
+
+  const pool = allPokemonNames;
+  
   do {
     const randomName = pool[Math.floor(Math.random() * pool.length)];
     randomGuess = allPokemonData[randomName];
@@ -260,7 +268,10 @@ function setupUIForMode() {
 
 function endGame(isWin) {
   gameOver = true;
-  showResultModal(correctPokemon, isWin ? "正解" : "残念", gameMode, guessesLeft);
+  const usedHintLabels = gameMode === 'versus'
+    ? []
+    : getHintLabelsByKeys(Array.from(hintRevealedKeys), gameMode);
+  showResultModal(correctPokemon, isWin ? "正解" : "残念", gameMode, guessesLeft, usedHintLabels);
   setHintButtonEnabled(false);
 }
 
