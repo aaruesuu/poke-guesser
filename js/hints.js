@@ -118,6 +118,13 @@ export function getHintKeysForMode(mode) {
   return collectDefinitions(mode).map((def) => def.key);
 }
 
+export function getHintLabelsByKeys(keys, mode) {
+  if (!Array.isArray(keys) || keys.length === 0) return [];
+  const defs = collectDefinitions(mode);
+  const keySet = new Set(keys);
+  return defs.filter((def) => keySet.has(def.key)).map((def) => def.label);
+}
+
 export function requestHint({ pokemon, mode, disabledKeys = new Set() }) {
   if (!pokemon) return Promise.resolve(null);
   const defs = collectDefinitions(mode);
