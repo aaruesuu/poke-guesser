@@ -23,8 +23,9 @@
       <nav id="nav-menu">
         <div class="header-buttons">
           <button class="header-button" id="home-button">HOMEへ</button>
+          <button class="header-button" id="settings-button">設定</button>
           <button class="header-button" id="how-to-play-button">遊び方</button>
-          <button class="header-button" id="about-site-button">このサイトについて</button>
+          <button class="header-button" id="updates-button" type="button">更新情報</button>
         </div>
       </nav>
     </header>
@@ -47,6 +48,46 @@
 
           <div class="sub-buttons-container">
             <button class="sub-button" id="how-to-play-button-home">遊び方</button>
+            <button
+              class="sub-button settings-button"
+              id="settings-button-home"
+              type="button"
+              aria-label="設定"
+            >
+              <img src="img/歯車.png" alt="" aria-hidden="true" />
+              <span class="sr-only">設定</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="updates-screen" class="hidden updates-screen" aria-labelledby="updates-title">
+          <h2 id="updates-title">更新情報</h2>
+          <p class="updates-intro">サイトの最新アップデートをお知らせします</p>
+          <div class="updates-list">
+            <article class="updates-item">
+              <h3 class="updates-date">2025.12/22</h3>
+              <p class="updates-body">サイト公開</p>
+            </article>
+          </div>
+        </div>
+
+        <div id="settings-screen" class="hidden">
+          <h2 id="settings-title">出題範囲の設定</h2>
+          <p class="settings-description">
+            出題候補に含めたい作品名にチェックを入れてください
+          </p>
+          <p class="settings-description-subtle">  
+            ※未選択の場合はすべてのタイトルが対象になります
+          </p>
+          <div class="settings-actions">
+            <button id="settings-select-all" type="button" class="sub-button">すべて選択</button>
+            <button id="settings-clear-all" type="button" class="sub-button subtle">すべて解除</button>
+          </div>
+          <div id="settings-selection-summary" class="settings-summary"></div>
+          <div id="settings-options" class="settings-option-container"></div>
+          <div class="settings-footer">
+            <button class="action-button" id="settings-save-button" type="button">保存して戻る</button>
+            <button class="action-button secondary" id="settings-cancel-button" type="button">キャンセル</button>
           </div>
         </div>
 
@@ -144,6 +185,10 @@
             <div class="profile-left"></div>
             <div class="profile-right"></div>
           </div>
+        </div>
+        <div id="result-modal-hints" class="result-hints">
+          <p class="result-hints-label">使用したヒント：</p>
+          <p class="result-hints-list"></p>
         </div>
       </div>
     </div>
