@@ -9,10 +9,21 @@ import {
   formatGenderRate,
 } from "./utils.js";
   
+import {
+  getDebutFilterSections,
+  getActiveDebutTitles,
+  setDebutTitlesEnabled,
+  selectAllDebutTitles,
+  clearAllDebutTitles,
+  getDebutSelectionSummary,
+} from "./settings.js";
+
 const allPokemonNames = Object.keys(allPokemonData);
 
 const modeSelectionScreen = document.getElementById('mode-selection-screen');
 const gameContainer = document.getElementById('game-container');
+const updatesScreen = document.getElementById('updates-screen');
+const settingsScreen = document.getElementById('settings-screen');
 
 const randomStartModeButton = document.getElementById('random-start-mode-button');
 const statsModeButton = document.getElementById('base-stats-mode-button');
@@ -25,7 +36,10 @@ const hintButton = document.getElementById('hint-button');
 
 const howToPlayButton = document.getElementById('how-to-play-button');
 const howToPlayButtonHome = document.getElementById('how-to-play-button-home');
+const updatesButton = document.getElementById('updates-button');
 const aboutSiteButton = document.getElementById('about-site-button');
+const settingsButton = document.getElementById('settings-button');
+const settingsButtonHome = document.getElementById('settings-button-home');
 
 const modalOverlay = document.getElementById('modal-overlay');
 const modalContent = document.getElementById('modal-content');
@@ -52,7 +66,15 @@ const gameTitle = document.getElementById('game-title');
 const gameStatus = document.getElementById('game-status');
 const turnsRemaining = document.getElementById('turns-remaining');
 
+const settingsOptionContainer = document.getElementById('settings-options');
+const settingsSelectionSummary = document.getElementById('settings-selection-summary');
+const settingsSaveButton = document.getElementById('settings-save-button');
+const settingsCancelButton = document.getElementById('settings-cancel-button');
+const settingsSelectAllButton = document.getElementById('settings-select-all');
+const settingsClearAllButton = document.getElementById('settings-clear-all');
+
 let resultAccordionSeq = 0;
+let lastNonSettingsScreen = modeSelectionScreen?.id || 'mode-selection-screen';
 
 function setAccordionExpanded(btn, expanded) {
   if (!btn) return;
@@ -84,7 +106,7 @@ export function initDOM(handlers) {
       hamburgerMenu.classList.toggle('is-active');
       navMenu.classList.toggle('is-active');
     });
-    navMenu.querySelectorAll('button').forEach(btn => {
+    navMenu.querySelectorAll('button, a').forEach(btn => {
       btn.addEventListener('click', () => {
         hamburgerMenu.classList.remove('is-active');
         navMenu.classList.remove('is-active');
@@ -105,13 +127,16 @@ export function initDOM(handlers) {
 
   if (guessInput) guessInput.addEventListener('input', handleInput);
   document.addEventListener('click', (event) => {
-    if (!gameControls.contains(event.target)) {
+    if (gameControls && !gameControls.contains(event.target)) {
       suggestionsBox.classList.add('hidden');
     }
   });
 
   if (howToPlayButton) howToPlayButton.addEventListener('click', openHowToPlayModal);
   if (howToPlayButtonHome) howToPlayButtonHome.addEventListener('click', openHowToPlayModal);
+  if (updatesButton) updatesButton.addEventListener('click', openUpdatesScreen);
+  if (settingsButton) settingsButton.addEventListener('click', openSettingsScreen);
+  if (settingsButtonHome) settingsButtonHome.addEventListener('click', openSettingsScreen);
 
   if (modalCloseButton) modalCloseButton.addEventListener('click', closeModal);
   if (modalOverlay) modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
@@ -132,10 +157,23 @@ export function initDOM(handlers) {
       }
     });
   }
-}
   
+  if (settingsSaveButton) settingsSaveButton.addEventListener('click', closeSettingsScreen);
+  if (settingsCancelButton) settingsCancelButton.addEventListener('click', closeSettingsScreen);
+  if (settingsSelectAllButton) settingsSelectAllButton.addEventListener('click', () => {
+    selectAllDebutTitles();
+    renderDebutFilterOptions();
+  });
+  if (settingsClearAllButton) settingsClearAllButton.addEventListener('click', () => {
+    clearAllDebutTitles();
+    renderDebutFilterOptions();
+  });
+
+  renderDebutFilterOptions();
+}
+
 export function switchScreen(targetScreen) {
-  const screens = [modeSelectionScreen, gameContainer];
+  const screens = [modeSelectionScreen, gameContainer, updatesScreen];
   screens.forEach(screen => {
     if (screen.id === targetScreen) {
       screen.classList.remove('hidden');
@@ -143,6 +181,9 @@ export function switchScreen(targetScreen) {
       screen.classList.add('hidden');
     }
   });
+  if (targetScreen && targetScreen !== 'settings-screen') {
+    lastNonSettingsScreen = targetScreen;
+  }
 }
   
 export function setGameStatus(text) { gameStatus.textContent = text || ""; }
@@ -327,7 +368,7 @@ export function getResultRows() {
   return Array.from(resultHistory.querySelectorAll('.result-row'));
 }
 
-export function showResultModal(pokemon, verdict, gameMode, guessesLeft) {
+export function showResultModal(pokemon, verdict, gameMode, guessesLeft, usedHintLabels = []) {
   const verdictEl = resultModal.querySelector('#result-modal-verdict span');
   verdictEl.textContent = verdict;
 
@@ -432,6 +473,13 @@ export function showResultModal(pokemon, verdict, gameMode, guessesLeft) {
   if (backToMenuBtn) {
     backToMenuBtn.textContent = gameMode === 'versus' ? 'ホームへ戻る' : 'モード選択へ';
   }
+  const hintSection = resultModal.querySelector('#result-modal-hints');
+  const hintListEl = hintSection?.querySelector('.result-hints-list');
+  if (hintSection && hintListEl) {
+    const hasHints = Array.isArray(usedHintLabels) && usedHintLabels.length > 0;
+    hintListEl.textContent = hasHints ? usedHintLabels.join('・') : 'なし';
+    hintSection.classList.remove('hidden');
+  }
 
   resultModalOverlay.classList.remove('hidden');
 }
@@ -533,6 +581,80 @@ function handleInput() {
   }
 }
   
+function openSettingsScreen() {
+  renderDebutFilterOptions();
+  switchScreen('settings-screen');
+}
+
+function closeSettingsScreen() {
+  switchScreen(lastNonSettingsScreen || 'mode-selection-screen');
+}
+
+function renderDebutFilterOptions() {
+  if (!settingsOptionContainer) return;
+  const activeTitles = getActiveDebutTitles();
+  const sections = getDebutFilterSections();
+
+  settingsOptionContainer.innerHTML = '';
+
+  sections.forEach((section) => {
+    const sectionEl = document.createElement('section');
+    sectionEl.className = 'settings-section';
+
+    const heading = document.createElement('h3');
+    heading.textContent = section.heading;
+    sectionEl.appendChild(heading);
+
+    const list = document.createElement('div');
+    list.className = 'settings-option-list';
+
+    section.options.forEach((opt) => {
+      const checkboxId = `settings-${opt.id}`;
+      const wrapper = document.createElement('label');
+      wrapper.className = 'settings-option';
+      wrapper.setAttribute('for', checkboxId);
+
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.id = checkboxId;
+      const isActive = opt.titles.every((title) => activeTitles.has(title));
+      const isPartial = !isActive && opt.titles.some((title) => activeTitles.has(title));
+      checkbox.checked = isActive;
+      checkbox.indeterminate = isPartial;
+
+      checkbox.addEventListener('change', () => {
+        setDebutTitlesEnabled(opt.titles, checkbox.checked);
+        renderDebutFilterOptions();
+      });
+
+      const label = document.createElement('span');
+      label.textContent = opt.label;
+
+      wrapper.appendChild(checkbox);
+      wrapper.appendChild(label);
+      list.appendChild(wrapper);
+    });
+
+    sectionEl.appendChild(list);
+    settingsOptionContainer.appendChild(sectionEl);
+  });
+
+  updateDebutSelectionSummary();
+}
+
+function updateDebutSelectionSummary() {
+  if (!settingsSelectionSummary) return;
+  const { selected, effectiveSelected, total, usingFallback } = getDebutSelectionSummary();
+  const allSelected = effectiveSelected >= total && !usingFallback;
+  if (usingFallback) {
+    settingsSelectionSummary.textContent = `有効な選択がありません（選択数: 0/${total}）。※未選択または未対応タイトルのみの場合は全てのタイトルが対象になります。`;
+    return;
+  }
+  settingsSelectionSummary.textContent = allSelected
+    ? `選択数：${effectiveSelected}/${total}`
+    : `選択数：${effectiveSelected}/${total}`;
+}
+
 export function openModal(title, content, options = {}) {
 
   const { addHeaderDivider = true } = options;
@@ -605,6 +727,83 @@ function openHowToPlayModal() {
 
     <section class="accordion-item">
       <h4 class="accordion-header">
+        <button class="accordion-trigger" aria-expanded="false" aria-controls="acc-panel-scope" id="acc-btn-scope">
+          出題範囲
+          <span class="accordion-icon" aria-hidden="true"></span>
+        </button>
+      </h4>
+      <div id="acc-panel-scope" class="accordion-panel" role="region" aria-labelledby="acc-btn-scope" hidden>
+        <div class="accordion-panel-inner">
+          <ul class="bullets">
+            <li>
+              全国図鑑 No.1–1025 のポケモン<br>
+              （※一部フォルム違いを含む）
+            </li>
+            <li>
+              メガシンカポケモン
+            </li>
+          </ul>
+          <p class="note">
+            ※設定画面で初出作品による出題範囲の絞り込みが可能です。
+          </p>
+        </div>
+      </div>
+    </section>
+  
+    <section class="accordion-item">
+      <h4 class="accordion-header">
+        <button class="accordion-trigger" aria-expanded="false" aria-controls="acc-panel-titles" id="acc-btn-titles">
+          対象作品（初出作品）
+          <span class="accordion-icon" aria-hidden="true"></span>
+        </button>
+      </h4>
+      <div id="acc-panel-titles" class="accordion-panel" role="region" aria-labelledby="acc-btn-titles" hidden>
+        <div class="accordion-panel-inner">
+          <ul class="bullets">
+            <li><strong>第一世代</strong><br>
+              ポケットモンスター 赤／緑／青／ピカチュウ
+            </li>
+            <li><strong>第二世代</strong><br>
+              ポケットモンスター 金／銀／クリスタル
+            </li>
+            <li><strong>第三世代</strong><br>
+              ポケットモンスター ルビー／サファイア／<br>
+              ファイアレッド／リーフグリーン／エメラルド
+            </li>
+            <li><strong>第四世代</strong><br>
+              ポケットモンスター ダイヤモンド／パール／プラチナ／<br>
+              ハートゴールド／ソウルシルバー
+            </li>
+            <li><strong>第五世代</strong><br>
+              ポケットモンスター ブラック／ホワイト／<br>
+              ブラック2／ホワイト2
+            </li>
+            <li><strong>第六世代</strong><br>
+              ポケットモンスター X／Y／<br>
+              オメガルビー／アルファサファイア
+            </li>
+            <li><strong>第七世代</strong><br>
+              ポケットモンスター サン／ムーン／<br>
+              ウルトラサン／ウルトラムーン
+            </li>
+            <li><strong>第八世代</strong><br>
+              ポケットモンスター ソード／シールド／<br>
+              ブリリアントダイヤモンド／シャイニングパール／<br>
+              レッツゴー ピカチュウ・イーブイ／LEGENDS アルセウス
+            </li>
+            <li><strong>第九世代</strong><br>
+              ポケットモンスター スカーレット／バイオレット
+            </li>
+            <li><strong>外伝作品</strong><br>
+              ポケモンGO／ポケモンHOME
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="accordion-item">
+      <h4 class="accordion-header">
         <button class="accordion-trigger" aria-expanded="false" aria-controls="acc-panel-metrics" id="acc-btn-metrics">
           比較項目等の補足情報
           <span class="accordion-icon" aria-hidden="true"></span>
@@ -664,20 +863,6 @@ function openHowToPlayModal() {
 
     <section class="accordion-item">
       <h4 class="accordion-header">
-      <button class="accordion-trigger" aria-expanded="false" aria-controls="acc-panel-battle" id="acc-btn-battle">
-      対戦モードとは
-          <span class="accordion-icon" aria-hidden="true"></span>
-        </button>
-      </h4>
-      <div id="acc-panel-battle" class="accordion-panel" role="region" aria-labelledby="acc-btn-battle" hidden>
-        <div class="accordion-panel-inner">
-        <p>オンラインで1対1の推測バトルを行うモードです。先行後攻決定後、自動でランダムなポケモンが1匹表示され、そこから交互に回答していきます。</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="accordion-item">
-      <h4 class="accordion-header">
         <button class="accordion-trigger" aria-expanded="false" aria-controls="acc-panel-stats" id="acc-btn-stats">
         種族値モードとは
           <span class="accordion-icon" aria-hidden="true"></span>
@@ -699,6 +884,20 @@ function openHowToPlayModal() {
         </div>
       </div>
     </section>
+
+    <section class="accordion-item">
+      <h4 class="accordion-header">
+      <button class="accordion-trigger" aria-expanded="false" aria-controls="acc-panel-battle" id="acc-btn-battle">
+      対戦モードとは
+          <span class="accordion-icon" aria-hidden="true"></span>
+        </button>
+      </h4>
+      <div id="acc-panel-battle" class="accordion-panel" role="region" aria-labelledby="acc-btn-battle" hidden>
+        <div class="accordion-panel-inner">
+        <p>オンラインで1対1の推測バトルを行うモードです。先行後攻決定後、自動でランダムなポケモンが1匹表示され、そこから交互に回答していきます。</p>
+        </div>
+      </div>
+    </section>
   </div>
   
 `;
@@ -710,6 +909,12 @@ openModal('遊び方', howToContent);
     document.querySelector('#modal .accordion') ||
     document.querySelector('.accordion');
   setupAccordion(accRoot);
+}
+
+function openUpdatesScreen() {
+  switchScreen('updates-screen');
+  setGameTitle('');
+  setGameStatus('');
 }
 
 function setupAccordion(root) {
