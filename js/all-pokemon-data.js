@@ -34043,7 +34043,7 @@ export const allPokemonData = {
     "genderRate": 0,
     "formsSwitchable": false,
     "debutGen": 1,
-    "debutTitle": "赤緑"
+    "debutTitle": "SV"
   },
   "ケンタロス（パルデアのすがた炎）": {
     "id": 10251,
@@ -34072,7 +34072,7 @@ export const allPokemonData = {
     "genderRate": 0,
     "formsSwitchable": false,
     "debutGen": 1,
-    "debutTitle": "赤緑"
+    "debutTitle": "SV"
   },
   "ケンタロス（パルデアのすがた水）": {
     "id": 10252,
@@ -34101,37 +34101,8 @@ export const allPokemonData = {
     "genderRate": 0,
     "formsSwitchable": false,
     "debutGen": 1,
-    "debutTitle": "赤緑"
+    "debutTitle": "SV"
   },
-  // "ピカチュウ（オリジナルキャップ）": {
-  //   "id": 10094,
-  //   "name": "ピカチュウ（オリジナルキャップ）",
-  //   "generation": 1,
-  //   "type1": "でんき",
-  //   "type2": "なし",
-  //   "height": 0.4,
-  //   "weight": 6,
-  //   "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/10094.png",
-  //   "evolutionCount": 1,
-  //   "stats": {
-  //     "hp": 35,
-  //     "attack": 55,
-  //     "defense": 40,
-  //     "spAttack": 50,
-  //     "spDefense": 50,
-  //     "speed": 90
-  //   },
-  //   "totalStats": 320,
-  //   "ability1": "せいでんき",
-  //   "ability2": "なし",
-  //   "hiddenAbility": "ひらいしん",
-  //   "eggGroup1": "陸上",
-  //   "eggGroup2": "妖精",
-  //   "genderRate": 4,
-  //   "formsSwitchable": false,
-  //   "debutGen": 1,
-  //   "debutTitle": "赤緑"
-  // },
   "デオキシス（アタックフォルム）": {
     "id": 10001,
     "name": "デオキシス（アタックフォルム）",
@@ -34973,35 +34944,6 @@ export const allPokemonData = {
     "debutGen": 5,
     "debutTitle": "B2W2"
   },
-  // "ケルディオ（かくごのすがた）": {
-  //   "id": 10024,
-  //   "name": "ケルディオ（かくごのすがた）",
-  //   "generation": 5,
-  //   "type1": "みず",
-  //   "type2": "かくとう",
-  //   "height": 1.4,
-  //   "weight": 48.5,
-  //   "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/10024.png",
-  //   "evolutionCount": 0,
-  //   "stats": {
-  //     "hp": 91,
-  //     "attack": 72,
-  //     "defense": 90,
-  //     "spAttack": 129,
-  //     "spDefense": 90,
-  //     "speed": 108
-  //   },
-  //   "totalStats": 580,
-  //   "ability1": "せいぎのこころ",
-  //   "ability2": "なし",
-  //   "hiddenAbility": "なし",
-  //   "eggGroup1": "タマゴ未発見",
-  //   "eggGroup2": "なし",
-  //   "genderRate": -1,
-  //   "formsSwitchable": true,
-  //   "debutGen": 5,
-  //   "debutTitle": "BW"
-  // },
   "メロエッタ（ステップフォルム）": {
     "id": 10018,
     "name": "メロエッタ（ステップフォルム）",
@@ -35870,7 +35812,7 @@ export const allPokemonData = {
     "genderRate": 8,
     "formsSwitchable": true,
     "debutGen": 5,
-    "debutTitle": "B2W2"
+    "debutTitle": "アルセウス"
   },
   "イルカマン（マイティフォルム）": {
     "id": 10256,
