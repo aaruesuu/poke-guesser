@@ -12,6 +12,7 @@ import {
 import {
   getDebutFilterSections,
   getActiveDebutTitles,
+  getDebutTitleCounts,
   setDebutTitlesEnabled,
   selectAllDebutTitles,
   clearAllDebutTitles,
@@ -37,6 +38,7 @@ const hintButton = document.getElementById('hint-button');
 const howToPlayButton = document.getElementById('how-to-play-button');
 const howToPlayButtonHome = document.getElementById('how-to-play-button-home');
 const updatesButton = document.getElementById('updates-button');
+const updatesBackButton = document.getElementById('updates-back-button');
 const aboutSiteButton = document.getElementById('about-site-button');
 const settingsButton = document.getElementById('settings-button');
 const settingsButtonHome = document.getElementById('settings-button-home');
@@ -135,6 +137,7 @@ export function initDOM(handlers) {
   if (howToPlayButton) howToPlayButton.addEventListener('click', openHowToPlayModal);
   if (howToPlayButtonHome) howToPlayButtonHome.addEventListener('click', openHowToPlayModal);
   if (updatesButton) updatesButton.addEventListener('click', openUpdatesScreen);
+  if (updatesBackButton) updatesBackButton.addEventListener('click', onBackToMenu);
   if (settingsButton) settingsButton.addEventListener('click', openSettingsScreen);
   if (settingsButtonHome) settingsButtonHome.addEventListener('click', openSettingsScreen);
 
@@ -368,7 +371,7 @@ export function getResultRows() {
   return Array.from(resultHistory.querySelectorAll('.result-row'));
 }
 
-export function showResultModal(pokemon, verdict, gameMode, guessesLeft, usedHintLabels = []) {
+export function showResultModal(pokemon, verdict, gameMode, guessesLeft, usedHintLabels = [], options = {}) {
   const verdictEl = resultModal.querySelector('#result-modal-verdict span');
   verdictEl.textContent = verdict;
 
@@ -380,7 +383,11 @@ export function showResultModal(pokemon, verdict, gameMode, guessesLeft, usedHin
   if (isVictory) {
     crackerImages.forEach(img => img.classList.remove('hidden'));
     if (gameMode === 'versus') {
-      scoreEl.textContent = 'おめでとうございます！';
+      if (options.finishedReason === 'surrender') {
+        scoreEl.textContent = '相手が降参しました';
+      } else {
+        scoreEl.textContent = 'おめでとうございます！';
+      }
     } else {
       const guessesTaken = 10 - guessesLeft;
       scoreEl.textContent = `${guessesTaken}回でクリア`;
@@ -388,9 +395,13 @@ export function showResultModal(pokemon, verdict, gameMode, guessesLeft, usedHin
   } else {
     crackerImages.forEach(img => img.classList.add('hidden'));
     if (gameMode === 'versus') {
-      scoreEl.textContent = verdict === '引き分け'
-        ? '回答数が上限に達しました。'
-        : '相手が正解しました。';
+      if (verdict === '引き分け') {
+        scoreEl.textContent = '回答数が上限に達しました。';
+      } else if (options.finishedReason === 'surrender') {
+        scoreEl.textContent = '降参しました';
+      } else {
+        scoreEl.textContent = '相手が正解しました。';
+      }
     }
   }
 
@@ -593,6 +604,7 @@ function closeSettingsScreen() {
 function renderDebutFilterOptions() {
   if (!settingsOptionContainer) return;
   const activeTitles = getActiveDebutTitles();
+  const titleCounts = getDebutTitleCounts();
   const sections = getDebutFilterSections();
 
   settingsOptionContainer.innerHTML = '';
@@ -630,8 +642,14 @@ function renderDebutFilterOptions() {
       const label = document.createElement('span');
       label.textContent = opt.label;
 
+      const count = opt.titles.reduce((sum, title) => sum + (titleCounts[title] || 0), 0);
+      const countEl = document.createElement('span');
+      countEl.className = 'settings-option-count';
+      countEl.textContent = `(${count})`;
+
       wrapper.appendChild(checkbox);
       wrapper.appendChild(label);
+      wrapper.appendChild(countEl);
       list.appendChild(wrapper);
     });
 
@@ -647,7 +665,7 @@ function updateDebutSelectionSummary() {
   const { selected, effectiveSelected, total, usingFallback } = getDebutSelectionSummary();
   const allSelected = effectiveSelected >= total && !usingFallback;
   if (usingFallback) {
-    settingsSelectionSummary.textContent = `有効な選択がありません（選択数: 0/${total}）。※未選択または未対応タイトルのみの場合は全てのタイトルが対象になります。`;
+    settingsSelectionSummary.textContent = `有効な選択がありません（選択数: 0/${total}）`;
     return;
   }
   settingsSelectionSummary.textContent = allSelected
