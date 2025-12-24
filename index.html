@@ -9,8 +9,6 @@
       rel="icon"
       href="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png"
     />
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5736331933387196"
-     crossorigin="anonymous"></script>
   </head>
   <body>
     <header id="app-header">
@@ -54,14 +52,36 @@
           </div>
         </div>
 
-        <div id="updates-screen" class="hidden updates-screen" aria-labelledby="updates-title">
+        <div id="updates-screen" class="hidden" aria-labelledby="updates-title">
           <h2 id="updates-title">更新情報</h2>
           <p class="updates-intro">サイトの最新アップデートをお知らせします</p>
           <div class="updates-list">
             <article class="updates-item">
-              <h3 class="updates-date">2025.12/22</h3>
+              <time class="updates-date" datetime="2025-12-22">
+                <span class="updates-year">2025</span>
+                <span class="updates-md">12 / 22</span>
+              </time>
               <p class="updates-body">サイト公開</p>
             </article>
+            <article class="updates-item">
+              <time class="updates-date" datetime="2025-12-22">
+                <span class="updates-year">2025</span>
+                <span class="updates-md">12 / 22</span>
+              </time>
+              <p class="updates-body">
+                サイトを正式に公開しました。トップ画面のUIを全面的に見直し、モード選択の導線を整理しています。
+                スマートフォン・タブレット表示時のレイアウト崩れや、文字サイズ・余白の不統一を修正し、
+                小さい画面でも直感的に操作できるよう改善しました。
+                また、内部処理のリファクタリングを行い、今後の機能追加に対応しやすい構成へ変更しています。
+                今後は対戦モードの安定性向上、マッチング周りの改善、細かなUI演出の追加を予定しています。
+              </p>
+            </article>
+            
+          </div>
+          <div class="update-footer">
+            <button class="action-button" id="updates-back-button" type="button">
+              ホームへ戻る
+            </button>
           </div>
         </div>
 
