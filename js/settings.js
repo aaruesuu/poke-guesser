@@ -52,6 +52,12 @@ const DATA_DEBUT_TITLES = new Set(
     .filter(Boolean)
 );
 
+const TITLE_COUNTS = Object.values(allPokemonData).reduce((counts, pokemon) => {
+  const title = pokemon.debutTitle;
+  if (!title) return counts;
+  counts[title] = (counts[title] || 0) + 1;
+  return counts;
+}, {});
 const KNOWN_TITLES = new Set(
   BASE_SECTIONS.flatMap((section) => section.options.flatMap((opt) => opt.titles))
 );
@@ -112,6 +118,10 @@ function setSelection(next) {
 
 export function getDebutFilterSections() {
   return buildSections();
+}
+
+export function getDebutTitleCounts() {
+  return { ...TITLE_COUNTS };
 }
 
 export function getActiveDebutTitles() {
