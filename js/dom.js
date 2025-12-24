@@ -173,7 +173,7 @@ export function initDOM(handlers) {
 }
 
 export function switchScreen(targetScreen) {
-  const screens = [modeSelectionScreen, gameContainer, updatesScreen];
+  const screens = [modeSelectionScreen, gameContainer, updatesScreen, settingsScreen];
   screens.forEach(screen => {
     if (screen.id === targetScreen) {
       screen.classList.remove('hidden');
