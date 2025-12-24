@@ -121,6 +121,11 @@ function pickRandomPokemon() {
   return allPokemonData[names[Math.floor(Math.random() * names.length)]];
 }
 
+function isRoomInvalid(roomData) {
+  if (!roomData) return false;
+  return roomData.status === "finished" || !!roomData.invalidatedAt;
+}
+
 function ensureLobbyRoot() {
   let root = document.getElementById("versus-lobby-area");
   if (!root) {
@@ -144,6 +149,21 @@ function ensureLobbyRoot() {
 
 function setLobbyContent(html) { ensureLobbyRoot().innerHTML = html; }
 function hideLobby() { const r = document.getElementById("versus-lobby-area"); if (r) r.style.display = "none"; }
+function showLobbyError(message) {
+  const errorEl = document.getElementById("vlobby-error");
+  if (!errorEl) {
+    showToast(message);
+    return;
+  }
+  errorEl.textContent = message;
+  errorEl.style.display = "block";
+}
+function clearLobbyError() {
+  const errorEl = document.getElementById("vlobby-error");
+  if (!errorEl) return;
+  errorEl.textContent = "";
+  errorEl.style.display = "none";
+}
 function showToast(msg) {
   let t = document.getElementById("versus-toast");
   if (!t) { t = document.createElement("div"); t.id = "versus-toast"; document.body.appendChild(t); }
@@ -380,6 +400,11 @@ function onTick() {
 }
 
 async function joinRoomByCode(code) {
+  const roomRef = doc(ensureDB(), "rooms", code);
+  const snap = await getDoc(roomRef);
+  if (snap.exists() && isRoomInvalid(snap.data())) {
+    throw new Error("ROOM_INVALID");
+  }
   state.roomId = code;
   state.code   = code;
   await claimRoomAsync(code);
@@ -646,10 +671,12 @@ async function postGuess(guessName) {
       updates.status = "finished";
       updates.winner = r.hostUid === state.me ? "host" : "guest";
       updates.finishedReason = "normal";
+      updates.invalidatedAt = serverTimestamp();
     } else if (nextTurnCount >= (r.maxTurns || MAX_TURNS)) {
       updates.status = "finished";
       updates.winner = "draw";
       updates.finishedReason = "max_turns";
+      updates.invalidatedAt = serverTimestamp();
     } else {
       const other = getOpponentUid(r, state.me) || opponentId(r.players, state.me) || state.me;
       updates.turnOf = other;
@@ -694,6 +721,7 @@ async function forceAdvanceTurnIfExpired() {
         status: "finished",
         winner: winnerRole,
         finishedReason: "timeout",
+        invalidatedAt: serverTimestamp(),
         lastActionAt: serverTimestamp(),
         lastActionBy: state.me,
       });
@@ -720,10 +748,12 @@ async function forceAdvanceTurnIfExpired() {
       updates.status = "finished";
       updates.winner = data.hostUid === data.turnOf ? "host" : "guest";
       updates.finishedReason = "normal";
+      updates.invalidatedAt = serverTimestamp();
     } else if (nextTurnCount >= maxTurns) {
       updates.status = "finished";
       updates.winner = "draw";
       updates.finishedReason = "max_turns";
+      updates.invalidatedAt = serverTimestamp();
     } else {
       updates.turnOf = other;
       updates.turnNumber = turnNumber + 1;
@@ -774,6 +804,7 @@ async function commitOpeningAutoGuess(roomRef, data) {
         updates.status = "finished";
         updates.winner = room.hostUid === room.turnOf ? "host" : "guest";
         updates.finishedReason = "normal";
+        updates.invalidatedAt = serverTimestamp();
       }
 
       const guessRef = doc(collection(roomRef, "guesses"));
@@ -872,6 +903,12 @@ function renderLobbyHTML() {
   setLobbyContent(html);
 
   const root = ensureLobbyRoot();
+  const codeInput = root.querySelector("#vs-code");
+  if (codeInput) {
+    codeInput.addEventListener("input", () => {
+      clearLobbyError();
+    });
+  }
 
   root.addEventListener("click", async (ev) => {
     const btn = ev.target.closest("#vs-create, #vs-join");
@@ -903,7 +940,13 @@ function renderLobbyHTML() {
         listenRoom(handleRoomState, handleGuessAdded);
       } catch (e) {
         console.error(e);
-        showToast("参加に失敗しました");
+        state.roomId = null;
+        state.code = null;
+        if (e && e.message === "ROOM_INVALID") {
+          showLobbyError("このルームコードは使用済みです\n新しいコードを発行してください");
+        } else {
+          showLobbyError("参加に失敗しました\n時間をおいて再度お試しください");
+        }
       }
       return;
     }
@@ -953,6 +996,9 @@ async function claimRoomAsync(code) {
       const rs = await tx.get(roomRef);
       if (rs.exists()) {
         const data = rs.data() || {};
+        if (isRoomInvalid(data)) {
+          throw new Error("ROOM_INVALID");
+        }
         const playersMap = data.players || {};
         
         // Add self if not exists
@@ -1046,6 +1092,7 @@ async function surrenderMatch() {
       status: "finished",
       winner: opponentRole,
       finishedReason: "surrender",
+      invalidatedAt: serverTimestamp(),
       lastActionAt: serverTimestamp(),
       lastActionBy: state.me,
     });
