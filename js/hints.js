@@ -128,11 +128,13 @@ export function getHintLabelsByKeys(keys, mode) {
 export function requestHint({ pokemon, mode, disabledKeys = new Set() }) {
   if (!pokemon) return Promise.resolve(null);
   const defs = collectDefinitions(mode);
+  const fullWidthKeys = new Set(["types", "abilities", "eggGroups"]);
   const options = defs.map((def) => ({
     key: def.key,
     label: def.label,
     value: def.getValue(pokemon) ?? "—",
     disabled: disabledKeys instanceof Set ? disabledKeys.has(def.key) : false,
+    fullWidth: fullWidthKeys.has(def.key),
   }));
 
   const available = options.filter((opt) => !opt.disabled);
@@ -183,6 +185,9 @@ export function requestHint({ pokemon, mode, disabledKeys = new Set() }) {
       btn.type = "button";
       btn.className = "hint-option-button";
       btn.textContent = opt.label;
+      if (opt.fullWidth) {
+        btn.classList.add("full-width");
+      }
       if (opt.disabled) {
         btn.disabled = true;
         btn.classList.add("is-disabled");
