@@ -50,14 +50,14 @@ import {
 
 // === 正解ポケモン固定 ===
 const DEBUG_FIXED_ANSWER = true;
-const DEBUG_FIXED_NAME = 'オタチ';
-const DEBUG_FIXED_ID = 161;
+const DEBUG_FIXED_NAME = 'ポニータ（ガラルのすがた）';
+const DEBUG_FIXED_ID = 10162;
 // =======================
 
 // === ランダムスタート初回固定 ===
 const DEBUG_FIXED_RANDOM_START = true;
-const DEBUG_FIXED_RANDOM_START_NAME = 'ヤジロン';
-const DEBUG_FIXED_RANDOM_START_ID = 343;
+const DEBUG_FIXED_RANDOM_START_NAME = 'メテノ（りゅうせいのすがた）';
+const DEBUG_FIXED_RANDOM_START_ID = 774;
 // ================================
 
 let gameMode = null;
