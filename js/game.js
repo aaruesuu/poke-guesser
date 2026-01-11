@@ -50,14 +50,14 @@ import {
 
 // === 正解ポケモン固定 ===
 const DEBUG_FIXED_ANSWER = true;
-const DEBUG_FIXED_NAME = 'オンバット';
-const DEBUG_FIXED_ID = 714;
+const DEBUG_FIXED_NAME = 'カラマネロ';
+const DEBUG_FIXED_ID = 687;
 // =======================
 
 // === ランダムスタート初回固定 ===
 const DEBUG_FIXED_RANDOM_START = true;
-const DEBUG_FIXED_RANDOM_START_NAME = 'カイデン';
-const DEBUG_FIXED_RANDOM_START_ID = 940;
+const DEBUG_FIXED_RANDOM_START_NAME = 'メガゲンガー';
+const DEBUG_FIXED_RANDOM_START_ID = 10038;
 // ================================
 
 let gameMode = null;
