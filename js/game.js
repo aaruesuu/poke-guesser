@@ -50,14 +50,14 @@ import {
 
 // === 正解ポケモン固定 ===
 const DEBUG_FIXED_ANSWER = true;
-const DEBUG_FIXED_NAME = 'デオキシス（スピードフォルム）';
-const DEBUG_FIXED_ID = 10003;
+const DEBUG_FIXED_NAME = 'ウツボット';
+const DEBUG_FIXED_ID = 71;
 // =======================
 
 // === ランダムスタート初回固定 ===
 const DEBUG_FIXED_RANDOM_START = true;
-const DEBUG_FIXED_RANDOM_START_NAME = 'ダグトリオ（アローラのすがた）';
-const DEBUG_FIXED_RANDOM_START_ID = 10106;
+const DEBUG_FIXED_RANDOM_START_NAME = 'サンド';
+const DEBUG_FIXED_RANDOM_START_ID = 27;
 // ================================
 
 let gameMode = null;
