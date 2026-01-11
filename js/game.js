@@ -49,10 +49,16 @@ import {
 } from "./settings.js";
 
 // === 正解ポケモン固定 ===
-const DEBUG_FIXED_ANSWER = false;
-const DEBUG_FIXED_NAME = 'カイリュー';
-const DEBUG_FIXED_ID = 149;
+const DEBUG_FIXED_ANSWER = true;
+const DEBUG_FIXED_NAME = 'デオキシス（スピードフォルム）';
+const DEBUG_FIXED_ID = 10003;
 // =======================
+
+// === ランダムスタート初回固定 ===
+const DEBUG_FIXED_RANDOM_START = true;
+const DEBUG_FIXED_RANDOM_START_NAME = 'ダグトリオ（アローラのすがた）';
+const DEBUG_FIXED_RANDOM_START_ID = 10106;
+// ================================
 
 let gameMode = null;
 let guessesLeft = 10;
@@ -232,11 +238,22 @@ function handleRandomStart() {
   let randomGuess;
 
   const pool = allPokemonNames;
-  
-  do {
-    const randomName = pool[Math.floor(Math.random() * pool.length)];
-    randomGuess = allPokemonData[randomName];
-  } while (isCorrectAnswer(randomGuess, correctPokemon));
+
+  if (DEBUG_FIXED_RANDOM_START) {
+    const byName = allPokemonData[DEBUG_FIXED_RANDOM_START_NAME];
+    const byId = Object.values(allPokemonData).find(p => p.id === DEBUG_FIXED_RANDOM_START_ID);
+    const fixed = byName || byId || null;
+    if (fixed && !isCorrectAnswer(fixed, correctPokemon)) {
+      randomGuess = fixed;
+    }
+  }
+
+  if (!randomGuess) {
+    do {
+      const randomName = pool[Math.floor(Math.random() * pool.length)];
+      randomGuess = allPokemonData[randomName];
+    } while (isCorrectAnswer(randomGuess, correctPokemon));
+  }
 
   const comparisonResult = comparePokemon(randomGuess, correctPokemon);
   renderResult(randomGuess, comparisonResult, gameMode);
