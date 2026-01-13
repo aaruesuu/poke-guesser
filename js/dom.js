@@ -42,6 +42,18 @@ const updatesBackButton = document.getElementById('updates-back-button');
 const aboutSiteButton = document.getElementById('about-site-button');
 const settingsButton = document.getElementById('settings-button');
 const settingsButtonHome = document.getElementById('settings-button-home');
+const howToHomeToggle = document.getElementById('how-to-home-toggle');
+const howtoSection = document.getElementById("how-to-home-section");
+const infoBackButtons = document.querySelectorAll('[data-info-back]');
+const infoScreenLinks = document.querySelectorAll('[data-info-screen]');
+const footer = document.getElementById('site-footer');
+const contactFormLink = document.getElementById('contact-form-link');
+const contactXLink = document.getElementById('contact-x-link');
+
+
+const HOW_TO_COLLAPSE_KEY = 'howtoCollapsed';
+const CONTACT_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSf6rxmqBZIOxu6MzWVbsbn89lg6xKwcTZ56hVWL4MDY5y4qRw/viewform?usp=dialog';
+const CONTACT_X_URL = 'https://x.com/adery_maison';
 
 const modalOverlay = document.getElementById('modal-overlay');
 const modalContent = document.getElementById('modal-content');
@@ -74,6 +86,10 @@ const settingsSaveButton = document.getElementById('settings-save-button');
 const settingsCancelButton = document.getElementById('settings-cancel-button');
 const settingsSelectAllButton = document.getElementById('settings-select-all');
 const settingsClearAllButton = document.getElementById('settings-clear-all');
+const privacyScreen = document.getElementById('privacy-screen');
+const termsScreen = document.getElementById('terms-screen');
+const contactScreen = document.getElementById('contact-screen');
+const creditsScreen = document.getElementById('credits-screen');
 
 let resultAccordionSeq = 0;
 let lastNonSettingsScreen = modeSelectionScreen?.id || 'mode-selection-screen';
@@ -140,6 +156,56 @@ export function initDOM(handlers) {
   if (updatesBackButton) updatesBackButton.addEventListener('click', onBackToMenu);
   if (settingsButton) settingsButton.addEventListener('click', openSettingsScreen);
   if (settingsButtonHome) settingsButtonHome.addEventListener('click', openSettingsScreen);
+  if (aboutSiteButton && footer) {
+    aboutSiteButton.addEventListener('click', () => {
+      footer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+
+  if (howToHomeToggle) {
+    const isCollapsed = localStorage.getItem(HOW_TO_COLLAPSE_KEY) === '1';
+    setAccordionExpanded(howToHomeToggle, !isCollapsed);
+
+    // 初期状態（リロード後）も反映
+    if (isCollapsed) {
+      howtoSection.classList.remove('is-expanded');
+    } else {
+      howtoSection.classList.add('is-expanded');
+    }
+
+    howToHomeToggle.addEventListener('click', () => {
+      toggleAccordion(howToHomeToggle);
+
+      const collapsed = howToHomeToggle.getAttribute('aria-expanded') !== 'true';
+
+      if (collapsed) {
+        localStorage.setItem(HOW_TO_COLLAPSE_KEY, '1');
+        howtoSection.classList.remove('is-expanded');   // ← 追加
+      } else {
+        localStorage.removeItem(HOW_TO_COLLAPSE_KEY);
+        howtoSection.classList.add('is-expanded');      // ← 追加
+      }
+    });
+  }
+
+
+  if (infoBackButtons.length > 0) {
+    infoBackButtons.forEach((btn) => {
+      btn.addEventListener('click', onBackToMenu);
+    });
+  }
+
+  if (infoScreenLinks.length > 0) {
+    infoScreenLinks.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const target = btn.getAttribute('data-info-screen');
+        if (target) openInfoScreen(target);
+      });
+    });
+  }
+
+  if (contactFormLink) contactFormLink.href = CONTACT_FORM_URL;
+  if (contactXLink) contactXLink.href = CONTACT_X_URL;
 
   if (modalCloseButton) modalCloseButton.addEventListener('click', closeModal);
   if (modalOverlay) modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
@@ -176,7 +242,16 @@ export function initDOM(handlers) {
 }
 
 export function switchScreen(targetScreen) {
-  const screens = [modeSelectionScreen, gameContainer, updatesScreen, settingsScreen];
+  const screens = [
+    modeSelectionScreen,
+    gameContainer,
+    updatesScreen,
+    settingsScreen,
+    privacyScreen,
+    termsScreen,
+    contactScreen,
+    creditsScreen,
+  ];
   screens.forEach(screen => {
     if (screen.id === targetScreen) {
       screen.classList.remove('hidden');
@@ -704,27 +779,6 @@ function openHowToPlayModal() {
   <div class="accordion" role="region" aria-label="遊び方の詳細">
     <section class="accordion-item">
       <h4 class="accordion-header">
-        <button class="accordion-trigger" aria-expanded="false" aria-controls="acc-panel-about" id="acc-btn-about">
-          Poke Guesserとは
-          <span class="accordion-icon" aria-hidden="true"></span>
-        </button>
-      </h4>
-      <div id="acc-panel-about" class="accordion-panel" role="region" aria-labelledby="acc-btn-about" hidden>
-        <div class="accordion-panel-inner">
-          <p>
-            入力したポケモンと正解のポケモンを比較し、<strong>一致・部分一致・不一致</strong>を色で可視化します。<br>
-            種族値の合計や高さ・重さなどの<strong>数値項目</strong>が一致しない場合には、
-            <strong>▲/▼</strong>（正解の値がある領域）を表示します。
-          </p>
-          <p class="note">
-            対象は本編<strong>第1〜第9世代</strong>（RG〜ZA）に登場するポケモンです（対応フォルムはゲーム内データに準拠）。
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <section class="accordion-item">
-      <h4 class="accordion-header">
         <button class="accordion-trigger" aria-expanded="false" aria-controls="acc-panel-rules" id="acc-btn-rules">
           ルール説明
           <span class="accordion-icon" aria-hidden="true"></span>
@@ -931,6 +985,12 @@ openModal('遊び方', howToContent);
 
 function openUpdatesScreen() {
   switchScreen('updates-screen');
+  setGameTitle('');
+  setGameStatus('');
+}
+
+function openInfoScreen(targetScreen) {
+  switchScreen(targetScreen);
   setGameTitle('');
   setGameStatus('');
 }
