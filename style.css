@@ -38,7 +38,7 @@ html {
 body {
   background-color: var(--c-bg);
   color: var(--c-text);
-  font-family: DotGothic16, sans-serif;
+  font-family: "Zen Maru Gothic", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", sans-serif;
   font-size: 16px;
   overflow-x: hidden;
 }
@@ -75,7 +75,8 @@ body {
   flex-grow: 1;
 }
 #mode-selection-screen {
-  justify-content: center;
+  justify-content: flex-start;
+  gap: 1.2rem;
 }
 #app-header {
   align-items: center;
@@ -92,7 +93,7 @@ body {
   border: none;
   color: var(--c-white);
   cursor: pointer;
-  font-family: inherit;
+  font-family: DotGothic16, sans-serif;
   font-size: 1.2rem;
   font-weight: 700;
   padding: 0;
@@ -172,14 +173,20 @@ body {
 #nav-menu .header-button:last-child {
   border-bottom: none;
 }
-#selection-title {
-  font-family: "M PLUS 1p", "Zen Maru Gothic", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", sans-serif;
-  font-size: clamp(1.1rem, 1.4vw + 0.6rem, 1.6rem);
-  color: var(--c-text);
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  margin-bottom: 1.2rem;
-  text-align: center;
+#nav-menu .header-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0.6rem;
+}
+.header-link {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 999px;
+  color: var(--c-white);
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 0.35rem 0.7rem;
 }
   
 .mode-selection-container {
@@ -187,6 +194,64 @@ body {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  margin-top: 2rem;
+}
+.home-accordion {
+  margin: 0 auto;
+  width: 100%;
+  height: auto;
+  box-sizing: border-box;
+  background: var(--c-black-op10);
+  border: 2px solid var(--c-border);
+  border-radius: 10px;
+  padding: 0.8rem 0.9rem;
+}
+#how-to-home-section.is-expanded {
+  margin: 0 auto;
+  width: 100%;
+  overflow: auto; 
+  box-sizing: border-box;
+  background: var(--c-black-op10);
+  border: 2px solid var(--c-border);
+  border-radius: 10px;
+  padding: 0.8rem 0.9rem;
+}
+.home-accordion .accordion-trigger {
+  background: var(--c-border);
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+.home-accordion .accordion-panel-inner {
+  color: var(--c-text);
+  padding: 0.75rem;
+}
+.home-accordion .note {
+  color: var(--c-text);
+}
+#how-to-home-panel {
+  border-radius: 8px;
+  margin-top: 0.5rem;
+}
+.about-section {
+  background: var(--c-black-op10);
+  border: 2px solid var(--c-border);
+  border-radius: 10px;
+  padding: 0.9rem 1rem;
+  text-align: center;
+}
+.about-section h3 {
+  font-family: "Zen Maru Gothic", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", sans-serif;
+  font-size: 1rem;
+  margin-bottom: 0.35rem;
+}
+.about-section p {
+  font-family: "Zen Maru Gothic", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  text-align: left;
+}
+.about-section .sub-button {
+  margin-top: 0.6rem;
 }
 
 #settings-screen {
@@ -197,7 +262,7 @@ body {
 }
 
 #settings-title {
-  font-family: "M PLUS 1p", "Zen Maru Gothic", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", sans-serif;
+  font-family: "Zen Maru Gothic", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", sans-serif;
   font-size: clamp(1.1rem, 1.2vw + 0.6rem, 1.6rem);
   color: var(--c-text);
   margin-top: 0.5rem;
@@ -322,9 +387,45 @@ body {
   gap: 1rem;
   justify-content: flex-start;
 }
+.info-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  justify-content: flex-start;
+}
+.info-screen h2 {
+  font-family: "Zen Maru Gothic", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", sans-serif;
+  font-size: clamp(1.05rem, 1.2vw + 0.5rem, 1.5rem);
+  text-align: center;
+  margin-top: 0.5rem;
+}
+.info-content {
+  background: var(--c-black-op10);
+  border: 2px solid var(--c-border);
+  border-radius: 8px;
+  padding: 1rem;
+  font-family: "Zen Maru Gothic", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", sans-serif;
+  font-size: 0.92rem;
+  line-height: 1.7;
+}
+.info-content h3 {
+  font-size: 0.95rem;
+  margin: 0.9rem 0 0.4rem;
+}
+.info-content a {
+  color: var(--c-btn-classic);
+  font-weight: 700;
+  word-break: break-all;
+}
+.info-footer {
+  display: flex;
+  flex-direction: row;
+  margin: auto 0;
+  gap: 0.6rem;
+}
 
 #updates-title {
-  font-family: "M PLUS 1p", "Zen Maru Gothic", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", sans-serif;
+  font-family: "Zen Maru Gothic", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", sans-serif;
   font-size: clamp(1.1rem, 1.2vw + 0.6rem, 1.6rem);
   color: var(--c-text);
   margin-top: 0.5rem;
@@ -346,7 +447,7 @@ body {
   padding: 1rem;
 }
 .updates-item {
-  font-family: "Zen Maru Gothic", system-ui, sans-serif;
+  font-family: "Zen Maru Gothic", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", sans-serif;
   background: var(--c-white);
   border: 1px solid var(--c-border);
   border-radius: 8px;
@@ -371,7 +472,7 @@ body {
   justify-content: flex-start; /* 上寄せ */
 
   padding-top: 0.2rem;
-  font-family: "Zen Maru Gothic", system-ui, sans-serif;
+  font-family: "Zen Maru Gothic", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", sans-serif;
 }
 
 .updates-item::before {
@@ -427,7 +528,7 @@ body {
   padding-right: 0.8rem;
   border-right: 1px dashed var(--c-border);
 
-  font-family: "Zen Maru Gothic", system-ui, sans-serif;
+  font-family: "Zen Maru Gothic", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", sans-serif;
 }
 
 .updates-year {
@@ -479,10 +580,11 @@ body {
   width: 90%;
 }
 .mode-button:active {
-  box-shadow: none;
-  transform: translate(4px, 4px);
+  transform: translateY(1px);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.25);
 }
 .mode-button h3 {
+    font-family: "Zen Maru Gothic", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", sans-serif;
   font-size: 1.2rem;
 }
 .classic-button {
@@ -548,7 +650,7 @@ body {
 }
 .hint-button:active:not(.is-disabled):not(:disabled) {
   transform: translateY(1px);
-  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.25);
 }
 .hint-button.is-disabled,
 .hint-button:disabled {
@@ -574,6 +676,7 @@ body {
   padding: 0.7rem;
 }
 #guess-input {
+    font-family: "Zen Maru Gothic", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", sans-serif;
   font-size: 1rem;
   width: 100%;
 }
@@ -589,8 +692,8 @@ body {
   font-size: 0.7rem;
 }
 .guess-button:active {
-  box-shadow: none;
-  transform: translate(2px, 2px);
+  transform: translateY(1px);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.25);
 }
 .action-button {
   border: 2px solid var(--c-border);
@@ -885,7 +988,7 @@ body {
   width: min(92%, 420px);
   padding: 1.4rem 1.1rem 1.1rem;
   position: relative;
-  font-family: "M PLUS 1p", "Zen Maru Gothic", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: "Zen Maru Gothic", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", sans-serif;
 }
 #hint-modal-title {
   font-size: 1.2rem;
@@ -1053,6 +1156,34 @@ body {
 #post-game-back-to-menu {
   background-color: var(--c-white);
 }
+.footer-links{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  justify-content: center;
+}
+
+.footer-link{
+  display: inline;
+  padding: 0;            /* ボタン余白を消す */
+  background: none;
+  border: 0;
+  text-decoration: underline;
+  font: inherit;
+  color: inherit;
+  white-space: nowrap;   /* 1単語内で改行しない */
+}
+
+#site-footer {
+  border-radius: 5px;
+  background: var(--c-header-bg);
+  border: 2px solid var(--c-border);
+  color: var(--c-white);
+  flex-shrink: 0;
+  padding: 0.75rem 0.9rem;
+  margin-top: 1.5rem;
+}
+
 .hidden {
   display: none !important;
 }
@@ -1064,11 +1195,13 @@ body {
   flex-direction: row;
   gap: 0.25rem;
   justify-content: center;
-  margin-top: 1.5rem;
+  margin-top: 0.5rem;
+  margin-bottom: 1.5rem;
   flex-wrap: wrap;
   width: 100%;
 }
 .sub-button {
+    font-family: "Zen Maru Gothic", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", sans-serif;
   background-color: #f0f0f0;
   border: 3px solid var(--c-border);
   border-radius: 6px;
@@ -1084,8 +1217,8 @@ body {
   border-style: dashed;
 }
 .sub-button:active {
-  box-shadow: none;
-  transform: translate(3px, 3px);
+  transform: translateY(1px);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.25);
 }
 #settings-button-home {
   --btn-color: var(--c-border);
@@ -1120,8 +1253,8 @@ body {
   object-fit: contain;
 }
 .settings-button:active {
-  transform: translate(2px, 2px);
-  box-shadow: none;
+  transform: translateY(1px);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.25);
 }
 .result-score-text {
   color: var(--c-accent);
@@ -1270,19 +1403,10 @@ body {
   touch-action: manipulation;
   transition: transform 0.08s ease;
 }
-#how-to-play-button-home:after,
-#how-to-play-button:after {
-  background: var(--btn-color);
-  content: "";
-  inset: 0;
-  position: absolute;
-  transform: translateY(100%);
-  transition: transform 0.15s ease;
-  z-index: 0;
-}
 #how-to-play-button-home:active:after,
 #how-to-play-button:active:after {
-  transform: translateY(0);
+  transform: translateY(1px);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.25);
 }
 #how-to-play-button-home > *,
 #how-to-play-button > * {
@@ -1291,8 +1415,8 @@ body {
 }
 #how-to-play-button-home:active,
 #how-to-play-button:active {
-  color: #fff;
   transform: translateY(1px);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.25);
 }
 #how-to-play-button-home:focus-visible,
 #how-to-play-button:focus-visible {
@@ -1324,8 +1448,8 @@ body {
   width: 230px;
 }
 #random-start-button:active {
-  box-shadow: none;
-  transform: translateY(1px) scale(0.985);
+  transform: translateY(1px);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.25);
 }
 .modal-head-divider {
   background: hsla(0, 0%, 100%, 0.25);
@@ -1510,7 +1634,7 @@ body {
 }
 .versus-skill-button:active:not(.skill-disabled):not(:disabled) {
   transform: translateY(1px);
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.22);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.25);
 }
 .versus-skill-button.skill-disabled {
   opacity: 0.45;
@@ -1526,7 +1650,7 @@ body {
   color: #fff;
 }
 .result-row.is-masked {
-  font-family: 'Zen Maru Gothic', 'Noto Sans JP', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-family: "Zen Maru Gothic", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", sans-serif;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1671,7 +1795,7 @@ body {
 }
 
 .vlobby-title{
-  font-family: 'M PLUS 1p','Zen Maru Gothic',system-ui,-apple-system,'Segoe UI',Roboto,'Noto Sans JP',sans-serif;
+  font-family:'Zen Maru Gothic',system-ui,-apple-system,'Segoe UI',Roboto,'Noto Sans JP',sans-serif;
   margin: 0;
   font-size: clamp(20px, 3vw, 26px);
   font-weight: 800;
@@ -1718,14 +1842,14 @@ body {
   width: 100%;
 }
 .vlobby-panel-title {
-  font-family: 'M PLUS 1p', 'Zen Maru Gothic', system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans JP', sans-serif;
+  font-family: 'Zen Maru Gothic', system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans JP', sans-serif;
   margin: 0;
   font-size: clamp(16px, 2.8vw, 18px);
   font-weight: 800;
   color: rgba(34, 34, 34, 0.92);
 }
 .vlobby-panel-description {
-  font-family: 'M PLUS 1p', 'Zen Maru Gothic', system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans JP', sans-serif;
+  font-family: 'Zen Maru Gothic', system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans JP', sans-serif;
   margin: 10px auto 18px;
   font-size: clamp(13px, 2.5vw, 15px);
   color: rgba(34, 34, 34, 0.7);
@@ -1770,7 +1894,7 @@ body {
 }
 .vlobby-btn:active {
   transform: translateY(1px);
-  box-shadow: 0 6px 14px rgba(34, 74, 95, 0.18);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.25);
 }
 .vlobby-btn:disabled {
   opacity: 0.55;
@@ -1789,14 +1913,14 @@ body {
   z-index: 1;
 }
 .vlobby-label {
-  font-family: 'M PLUS 1p', 'Zen Maru Gothic', system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans JP', sans-serif;
+  font-family: 'Zen Maru Gothic', system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans JP', sans-serif;
   font-size: 0.95rem;
   font-weight: 700;
   margin: 0 0 6px;
   color: rgba(34, 34, 34, 0.78);
 }
 .vlobby-hint {
-  font-family: 'M PLUS 1p', 'Zen Maru Gothic', system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans JP', sans-serif;
+  font-family: 'Zen Maru Gothic', system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans JP', sans-serif;
   font-size: 12px;
   opacity: 0.7;
   margin-top: 0.8rem;
@@ -1957,3 +2081,10 @@ body {
 }
 .result-row.by-me    .result-header{ background: var(--c-versus-me); color:#fff; }
 .result-row.by-opponent .result-header{ background: var(--c-versus-opponent); color:#fff; }
+.footer-copy {
+  margin-top: 10px;
+  font-family: "Zen Maru Gothic", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", sans-serif;
+  font-size: 0.75rem;
+  color: var(--c-white);
+  text-align: center;
+}
