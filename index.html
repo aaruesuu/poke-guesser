@@ -36,21 +36,52 @@
       <main id="main-content">
         <div id="mode-selection-screen">
           <!-- <h2 id="selection-title">モードを選んでください</h2> -->
-          <div class="mode-selection-container">
-            <button class="mode-button random-button" id="random-start-mode-button">
-              <h3>ノーマルモード</h3>
-            </button>
-            <button class="mode-button stats-button" id="base-stats-mode-button">
-              <h3>種族値モード</h3>
-            </button>
-            <button class="mode-button versus-button" id="versus-mode-button">
-              <h3>対戦モード</h3>
-            </button>
-          </div>
+          <div class="home-top-layout">
+            <div class="home-mode-column">
+              <div class="mode-selection-container">
+                <button class="mode-button random-button" id="random-start-mode-button">
+                  <h3>ノーマルモード</h3>
+                </button>
+                <button class="mode-button stats-button" id="base-stats-mode-button">
+                  <h3>種族値モード</h3>
+                </button>
+                <button class="mode-button versus-button" id="versus-mode-button">
+                  <h3>対戦モード</h3>
+                </button>
+              </div>
 
-          <div class="sub-buttons-container">
-            <button class="sub-button" id="how-to-play-button-home">遊び方</button>
-            <button class="sub-button" id="settings-button-home">設定</button>
+              <div class="sub-buttons-container">
+                <button class="sub-button" id="how-to-play-button-home">遊び方</button>
+                <button class="sub-button" id="settings-button-home">設定</button>
+              </div>
+            </div>
+
+            <section id="updates-section" class="updates-section" aria-labelledby="updates-title">
+              <h3 id="updates-title">更新情報</h3>
+              <p id="updates-intro">サイトの最新アップデートをお知らせします</p>
+              <div class="updates-list">
+                <article class="updates-item">
+                  <time class="updates-date" datetime="2025-12-22">
+                    <span class="updates-year">2025</span>
+                    <span class="updates-md">12 / 22</span>
+                  </time>
+                  <p class="updates-body">サイト公開</p>
+                </article>
+                <article class="updates-item">
+                  <time class="updates-date" datetime="2025-12-22">
+                    <span class="updates-year">2025</span>
+                    <span class="updates-md">12 / 22</span>
+                  </time>
+                  <p class="updates-body">
+                    サイトを正式に公開しました。トップ画面のUIを全面的に見直し、モード選択の導線を整理しています。
+                    スマートフォン・タブレット表示時のレイアウト崩れや、文字サイズ・余白の不統一を修正し、
+                    小さい画面でも直感的に操作できるよう改善しました。
+                    また、内部処理のリファクタリングを行い、今後の機能追加に対応しやすい構成へ変更しています。
+                    今後は対戦モードの安定性向上、マッチング周りの改善、細かなUI演出の追加を予定しています。
+                  </p>
+                </article>
+              </div>
+            </section>
           </div>
 
           <section id="about-pokeguesser-section" class="about-section">
@@ -146,39 +177,6 @@
               登録商標です。
             </p>
           </section>
-        </div>
-
-        <div id="updates-screen" class="hidden" aria-labelledby="updates-title">
-          <h2 id="updates-title">更新情報</h2>
-          <p class="updates-intro">サイトの最新アップデートをお知らせします</p>
-          <div class="updates-list">
-            <article class="updates-item">
-              <time class="updates-date" datetime="2025-12-22">
-                <span class="updates-year">2025</span>
-                <span class="updates-md">12 / 22</span>
-              </time>
-              <p class="updates-body">サイト公開</p>
-            </article>
-            <article class="updates-item">
-              <time class="updates-date" datetime="2025-12-22">
-                <span class="updates-year">2025</span>
-                <span class="updates-md">12 / 22</span>
-              </time>
-              <p class="updates-body">
-                サイトを正式に公開しました。トップ画面のUIを全面的に見直し、モード選択の導線を整理しています。
-                スマートフォン・タブレット表示時のレイアウト崩れや、文字サイズ・余白の不統一を修正し、
-                小さい画面でも直感的に操作できるよう改善しました。
-                また、内部処理のリファクタリングを行い、今後の機能追加に対応しやすい構成へ変更しています。
-                今後は対戦モードの安定性向上、マッチング周りの改善、細かなUI演出の追加を予定しています。
-              </p>
-            </article>
-            
-          </div>
-          <div class="update-footer">
-            <button class="action-button" id="updates-back-button" type="button">
-              ホームへ戻る
-            </button>
-          </div>
         </div>
 
         <div id="settings-screen" class="hidden">
