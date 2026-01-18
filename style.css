@@ -206,15 +206,8 @@ body {
   border-radius: 10px;
   padding: 0.8rem 0.9rem;
 }
-#how-to-home-section.is-expanded {
-  margin: 0 auto;
-  width: 100%;
-  overflow: auto; 
-  box-sizing: border-box;
-  background: var(--c-black-op10);
-  border: 2px solid var(--c-border);
-  border-radius: 10px;
-  padding: 0.8rem 0.9rem;
+#how-to-home-section {
+  margin-bottom: 1rem;
 }
 .home-accordion .accordion-trigger {
   background: var(--c-border);
@@ -1476,6 +1469,25 @@ body {
   gap: 0.25rem;
   margin-bottom: 1rem;
   padding-left: 1rem;
+}
+.home-bullets {
+  display: grid;
+  gap: 0.25rem;
+  margin: 1rem;
+  padding-left: 2rem;
+  text-align: left;
+}
+.home-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 1rem 0 1rem 0;
+  text-align: left;
+}
+.home-subtitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 1rem 0 1rem 0.5rem;
+  text-align: left;
 }
 .bullets:not(#rule-bullets) {
   margin: 1rem 0;
