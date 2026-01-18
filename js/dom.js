@@ -775,143 +775,7 @@ export function closeModal() {
 
 function openHowToPlayModal() {
   const howToContent = `
-  <p class="lead">
-    様々なヒントを駆使して、ターゲットのポケモンを推測するゲームです。<br>
-    回答から得られる<strong>色のヒント</strong>や<strong>数値の大小</strong>を手がかりに、正解を目指しましょう！
-  </p>
-
   <div class="accordion" role="region" aria-label="遊び方の詳細">
-    <section class="accordion-item">
-      <h4 class="accordion-header">
-        <button class="accordion-trigger" aria-expanded="false" aria-controls="acc-panel-rules" id="acc-btn-rules">
-          ルール説明
-          <span class="accordion-icon" aria-hidden="true"></span>
-        </button>
-      </h4>
-      <div id="acc-panel-rules" class="accordion-panel" role="region" aria-labelledby="acc-btn-rules" hidden>
-        <div class="accordion-panel-inner">
-          <p>回答したポケモンが正解にどれだけ近いかを<strong>色</strong>で表示します。</p>
-          <ul class="bullets">
-            <li><span class="legend legend-green">緑</span>：完全一致</li>
-            <li><span class="legend legend-yellow">黄</span>：部分一致<br>（例：タイプ／特性 の片方一致 など）</li>
-            <li><span class="legend legend-gray">灰</span>：不一致<br>（数値項目には <strong>▲/▼</strong> を併記）</li>
-          </ul>
-          <p class="note">1プレイの回答上限は<strong>10回</strong>です。</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="accordion-item">
-      <h4 class="accordion-header">
-        <button class="accordion-trigger" aria-expanded="false" aria-controls="acc-panel-scope" id="acc-btn-scope">
-          出題範囲
-          <span class="accordion-icon" aria-hidden="true"></span>
-        </button>
-      </h4>
-      <div id="acc-panel-scope" class="accordion-panel" role="region" aria-labelledby="acc-btn-scope" hidden>
-        <div class="accordion-panel-inner">
-          <ul class="bullets">
-            <li>
-              全国図鑑 No.1–1025 のポケモン<br>
-              （※一部フォルム違いを含む）
-            </li>
-            <li>
-              メガシンカポケモン
-            </li>
-          </ul>
-          <p class="note">
-            ※設定画面で初出作品による出題範囲の絞り込みが可能です。
-          </p>
-        </div>
-      </div>
-    </section>
-  
-    <section class="accordion-item">
-      <h4 class="accordion-header">
-        <button class="accordion-trigger" aria-expanded="false" aria-controls="acc-panel-titles" id="acc-btn-titles">
-          対象作品（初出作品）
-          <span class="accordion-icon" aria-hidden="true"></span>
-        </button>
-      </h4>
-      <div id="acc-panel-titles" class="accordion-panel" role="region" aria-labelledby="acc-btn-titles" hidden>
-        <div class="accordion-panel-inner">
-          <ul class="bullets">
-            <li><strong>第一世代</strong><br>
-              ポケットモンスター 赤／緑／青／ピカチュウ
-            </li>
-            <li><strong>第二世代</strong><br>
-              ポケットモンスター 金／銀／クリスタル
-            </li>
-            <li><strong>第三世代</strong><br>
-              ポケットモンスター ルビー／サファイア／<br>
-              ファイアレッド／リーフグリーン／エメラルド
-            </li>
-            <li><strong>第四世代</strong><br>
-              ポケットモンスター ダイヤモンド／パール／プラチナ／<br>
-              ハートゴールド／ソウルシルバー
-            </li>
-            <li><strong>第五世代</strong><br>
-              ポケットモンスター ブラック／ホワイト／<br>
-              ブラック2／ホワイト2
-            </li>
-            <li><strong>第六世代</strong><br>
-              ポケットモンスター X／Y／<br>
-              オメガルビー／アルファサファイア
-            </li>
-            <li><strong>第七世代</strong><br>
-              ポケットモンスター サン／ムーン／<br>
-              ウルトラサン／ウルトラムーン
-            </li>
-            <li><strong>第八世代</strong><br>
-              ポケットモンスター ソード／シールド／<br>
-              ブリリアントダイヤモンド／シャイニングパール／<br>
-              レッツゴー ピカチュウ・イーブイ／LEGENDS アルセウス
-            </li>
-            <li><strong>第九世代</strong><br>
-              ポケットモンスター スカーレット／バイオレット
-            </li>
-            <li><strong>外伝作品</strong><br>
-              ポケモンGO／ポケモンHOME
-            </li>
-          </ul>
-        </div>
-      </div>
-    </section>
-
-    <section class="accordion-item">
-      <h4 class="accordion-header">
-        <button class="accordion-trigger" aria-expanded="false" aria-controls="acc-panel-metrics" id="acc-btn-metrics">
-          比較項目等の補足情報
-          <span class="accordion-icon" aria-hidden="true"></span>
-        </button>
-      </h4>
-      <div id="acc-panel-metrics" class="accordion-panel" role="region" aria-labelledby="acc-btn-metrics" hidden>
-        <div class="accordion-panel-inner">
-          <ul id="rule-bullets" class="bullets">
-            <li><strong>初登場作品（世代）</strong>：<br>
-              <span class="legend legend-green">緑</span>＝初登場作品/世代とも一致<br>
-              <span class="legend legend-yellow">黄</span>＝世代のみ一致<br>
-              <span class="legend legend-gray">灰</span>＝世代が違う<br>※数値比較（<strong>▲/▼</strong>）も表示
-            </li>
-            <li><strong>タイプ/特性/タマゴグループ</strong>：<br>
-              <span class="legend legend-green">緑</span>=完全一致<br>
-              <span class="legend legend-yellow">黄</span>=部分一致<br>
-              <span class="legend legend-gray">灰</span>=不一致
-            </li>
-            <li><strong>合計種族値・高さ・重さ</strong>：<br>
-              <span class="legend legend-green">緑</span>=完全一致<br>
-              <span class="legend legend-gray">灰</span>=不一致<br>※数値比較（<strong>▲/▼</strong>）も表示
-            </li>
-            <li><strong>性別比・進化数</strong>：<br>
-              <span class="legend legend-green">緑</span>=完全一致
-              <span class="legend legend-gray">灰</span>=不一致
-            </li>
-          </ul>
-          <p class="note">作品略称の例：RG/剣盾/ZA など</p>
-        </div>
-      </div>
-    </section>
-
     <section class="accordion-item">
       <h4 class="accordion-header">
       <button class="accordion-trigger" aria-expanded="false" aria-controls="acc-panel-pokemon" id="acc-btn-pokemon">
@@ -974,11 +838,64 @@ function openHowToPlayModal() {
         </div>
       </div>
     </section>
+
+
+        <section class="accordion-item">
+      <h4 class="accordion-header">
+        <button class="accordion-trigger" aria-expanded="false" aria-controls="acc-panel-titles" id="acc-btn-titles">
+          対象作品（初出作品）
+          <span class="accordion-icon" aria-hidden="true"></span>
+        </button>
+      </h4>
+      <div id="acc-panel-titles" class="accordion-panel" role="region" aria-labelledby="acc-btn-titles" hidden>
+        <div class="accordion-panel-inner">
+          <ul class="bullets">
+            <li><strong>第一世代</strong><br>
+              ポケットモンスター 赤／緑／青／ピカチュウ
+            </li>
+            <li><strong>第二世代</strong><br>
+              ポケットモンスター 金／銀／クリスタル
+            </li>
+            <li><strong>第三世代</strong><br>
+              ポケットモンスター ルビー／サファイア／<br>
+              ファイアレッド／リーフグリーン／エメラルド
+            </li>
+            <li><strong>第四世代</strong><br>
+              ポケットモンスター ダイヤモンド／パール／プラチナ／<br>
+              ハートゴールド／ソウルシルバー
+            </li>
+            <li><strong>第五世代</strong><br>
+              ポケットモンスター ブラック／ホワイト／<br>
+              ブラック2／ホワイト2
+            </li>
+            <li><strong>第六世代</strong><br>
+              ポケットモンスター X／Y／<br>
+              オメガルビー／アルファサファイア
+            </li>
+            <li><strong>第七世代</strong><br>
+              ポケットモンスター サン／ムーン／<br>
+              ウルトラサン／ウルトラムーン
+            </li>
+            <li><strong>第八世代</strong><br>
+              ポケットモンスター ソード／シールド／<br>
+              ブリリアントダイヤモンド／シャイニングパール／<br>
+              レッツゴー ピカチュウ・イーブイ／LEGENDS アルセウス
+            </li>
+            <li><strong>第九世代</strong><br>
+              ポケットモンスター スカーレット／バイオレット
+            </li>
+            <li><strong>外伝作品</strong><br>
+              ポケモンGO／ポケモンHOME
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
   </div>
   
 `;
 
-openModal('遊び方', howToContent);
+openModal('モード説明', howToContent);
 
   const accRoot =
     document.querySelector('#modal .modal-body .accordion') ||
