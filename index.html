@@ -35,67 +35,6 @@
     <div id="theme-container">
       <main id="main-content">
         <div id="mode-selection-screen">
-          <section id="how-to-home-section" class="home-accordion">
-            <button
-              id="how-to-home-toggle"
-              class="accordion-trigger"
-              type="button"
-              aria-expanded="true"
-              aria-controls="how-to-home-panel">
-              Poke Guesserとは
-              <span class="accordion-icon" aria-hidden="true"></span>
-            </button>
-
-            <div
-              id="how-to-home-panel"
-              class="accordion-panel"
-              role="region"
-              aria-labelledby="how-to-home-toggle">
-              <div class="accordion-panel-inner">
-                <p>
-                  <strong>Poke Guesser</strong> は、表示されるヒントを手がかりに、
-                  出題されたポケモンが何かを推理していくクイズ形式のゲームです。
-                  ポケモンの名前を入力して回答し、そのたびに得られる情報を整理しながら、
-                  最終的な正解を目指します。
-                </p>
-
-                <p>
-                  回答として入力したポケモンの特徴は、ヒントとして一覧で表示されます。
-                  これらのヒントを比較することで、正解のポケモンがどのような条件を持っているかを
-                  少しずつ絞り込んでいくことができます。
-                </p>
-
-                <ul class="bullets">
-                  <li>🟩 <strong>緑</strong>：完全一致</li>
-                  <li>🟨 <strong>黄</strong>：部分一致</li>
-                  <li>⬜ <strong>灰</strong>：不一致</li>
-                </ul>
-
-                <p>
-                  高さや重さなど、数値で表される項目については、
-                  矢印アイコンによって正解の方向が示されます。
-                </p>
-
-                <ul class="bullets">
-                  <li>▲：正解値 <strong>の方が大きい</strong></li>
-                  <li>▼：正解値 <strong>の方が小さい</strong></li>
-                </ul>
-
-                <p>
-                  すべての条件を一度で満たす必要はありません。
-                  まずは情報量の多いポケモンを試し、
-                  得られたヒントをもとに候補を徐々に絞り込んでいくことが、
-                  このゲームの基本的な遊び方です。
-                </p>
-
-                <p class="note">
-                  ※ 詳しいルールや各モードの説明は、
-                  上部メニューまたは「遊び方」ボタンから確認できます。
-                </p>
-              </div>
-            </div>
-          </section>
-
           <!-- <h2 id="selection-title">モードを選んでください</h2> -->
           <div class="mode-selection-container">
             <button class="mode-button random-button" id="random-start-mode-button">
@@ -114,6 +53,78 @@
             <button class="sub-button" id="settings-button-home">設定</button>
           </div>
 
+          <section id="about-pokeguesser-section" class="about-section">
+            <h3 id="about-pokeguesser-title">Poke Guesserとは</h3>
+
+            <p>
+              Poke Guesserは、さまざまなヒントを手がかりに<strong>ターゲットとなるポケモンを推測するゲーム</strong>です。<br>
+              回答するたびに表示される色付きのヒントや数値の大小関係を活用し、正解を目指しましょう。
+            </p>
+
+            <h3 class="home-title">ヒントの見方</h3>
+            <ul class="home-bullets">
+              <li>🟩 <strong>緑</strong>：完全一致</li>
+              <li>🟨 <strong>黄</strong>：部分一致</li>
+              <li>⬜ <strong>灰</strong>：不一致</li>
+            </ul>
+
+            <p>
+              高さ・重さ・合計種族値など、数値で表される項目については、
+              <strong>矢印アイコン（▲ / ▼）</strong> によって正解値の方向が示されます。
+            </p>
+            <ul class="home-bullets">
+              <li>▲：正解値の方が大きい</li>
+              <li>▼：正解値の方が小さい</li>
+            </ul>
+
+            <h3 class="home-title">各比較項目の判定ルール</h3>
+
+            <p class="home-subtitle">初登場作品（世代）</p>
+            <ul class="home-bullets">
+              <li>🟩 緑：初登場作品・世代ともに一致</li>
+              <li>🟨 黄：世代のみ一致</li>
+              <li>⬜ 灰：世代が不一致</li>
+            </ul>
+            <p>※数値比較（▲ / ▼）も表示されます。</p>
+
+            <p class="home-subtitle">タイプ / 特性 / タマゴグループ</p>
+            <ul class="home-bullets">
+              <li>🟩 緑：完全一致</li>
+              <li>🟨 黄：部分一致</li>
+              <li>⬜ 灰：不一致</li>
+            </ul>
+
+            <p class="home-subtitle">合計種族値・高さ・重さ</p>
+            <ul class="home-bullets">
+              <li>🟩 緑：完全一致</li>
+              <li>⬜ 灰：不一致</li>
+            </ul>
+            <p>※数値比較（▲ / ▼）も表示されます。</p>
+
+            <p class="home-subtitle">性別比・進化数</p>
+            <ul class="home-bullets">
+              <li>🟩 緑：完全一致</li>
+              <li>⬜ 灰：不一致</li>
+            </ul>
+
+            <p>※作品略称の例：RG / 剣盾 / ZA など</p>
+
+            <h3 class="home-title">遊び方のコツ</h3>
+            <p>
+              すべての条件を一度で満たす必要はありません。<br>
+              まずは<strong>情報量の多いポケモン</strong>を入力し、得られたヒントをもとに
+              候補を少しずつ絞り込んでいくのが、Poke Guesserの基本的な遊び方です。
+            </p>
+
+            <h3 class="home-title">出題範囲</h3>
+            <ul class="home-bullets">
+              <li>全国図鑑 No.1–1025 のポケモン（※一部フォルム違いを含む）</li>
+              <li>メガシンカポケモン</li>
+            </ul>
+            <p>※設定画面から、<strong>初登場作品による出題範囲の絞り込み</strong>が可能です。</p>
+          </section>
+
+
           <section id="about-site-section" class="about-section">
             <h3>このサイトについて</h3>
 
@@ -122,11 +133,6 @@
               ブラウザ上で遊ぶことができます。<br>
               ポケモンのステータスなどの要素を使い、
               直感的に楽しめるゲーム体験を提供することを目的としています。
-            </p>
-
-            <p>
-              本サイトで使用しているポケモンに関するデータは、
-              PokeAPIにて公開されている情報を参考にしています。
             </p>
 
             <p>
@@ -357,11 +363,6 @@
           <div class="info-content">
             <ul class="bullets">
               <li>Pokémon © Nintendo / Creatures Inc. / GAME FREAK inc.</li>
-              <li>
-                Pokémon data provided by PokeAPI (
-                <a href="https://pokeapi.co/" target="_blank" rel="noopener noreferrer">https://pokeapi.co/</a>
-                )
-              </li>
               <li>
                 This website is a fan-made project and is not affiliated with or endorsed by Nintendo,
                 Creatures Inc., or GAME FREAK inc.
