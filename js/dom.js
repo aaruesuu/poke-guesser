@@ -23,7 +23,7 @@ const allPokemonNames = Object.keys(allPokemonData);
 
 const modeSelectionScreen = document.getElementById('mode-selection-screen');
 const gameContainer = document.getElementById('game-container');
-const updatesScreen = document.getElementById('updates-screen');
+const updatesSection = document.getElementById('updates-section');
 const settingsScreen = document.getElementById('settings-screen');
 
 const randomStartModeButton = document.getElementById('random-start-mode-button');
@@ -38,7 +38,6 @@ const hintButton = document.getElementById('hint-button');
 const howToPlayButton = document.getElementById('how-to-play-button');
 const howToPlayButtonHome = document.getElementById('how-to-play-button-home');
 const updatesButton = document.getElementById('updates-button');
-const updatesBackButton = document.getElementById('updates-back-button');
 const aboutSiteButton = document.getElementById('about-site-button');
 const settingsButton = document.getElementById('settings-button');
 const settingsButtonHome = document.getElementById('settings-button-home');
@@ -152,8 +151,14 @@ export function initDOM(handlers) {
 
   if (howToPlayButton) howToPlayButton.addEventListener('click', openHowToPlayModal);
   if (howToPlayButtonHome) howToPlayButtonHome.addEventListener('click', openHowToPlayModal);
-  if (updatesButton) updatesButton.addEventListener('click', openUpdatesScreen);
-  if (updatesBackButton) updatesBackButton.addEventListener('click', onBackToMenu);
+  if (updatesButton) {
+    updatesButton.addEventListener('click', async () => {
+      await onBackToMenu();
+      if (updatesSection) {
+        updatesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  }
   if (settingsButton) settingsButton.addEventListener('click', openSettingsScreen);
   if (settingsButtonHome) settingsButtonHome.addEventListener('click', openSettingsScreen);
   if (aboutSiteButton && footer) {
@@ -245,7 +250,6 @@ export function switchScreen(targetScreen) {
   const screens = [
     modeSelectionScreen,
     gameContainer,
-    updatesScreen,
     settingsScreen,
     privacyScreen,
     termsScreen,
@@ -981,12 +985,6 @@ openModal('遊び方', howToContent);
     document.querySelector('#modal .accordion') ||
     document.querySelector('.accordion');
   setupAccordion(accRoot);
-}
-
-function openUpdatesScreen() {
-  switchScreen('updates-screen');
-  setGameTitle('');
-  setGameStatus('');
 }
 
 function openInfoScreen(targetScreen) {
