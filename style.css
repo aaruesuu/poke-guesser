@@ -578,11 +578,10 @@ body {
 
 @media (min-width: 900px) {
   .home-top-layout {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
     gap: 2rem;
-    align-items: start;
-    justify-items: stretch;
   }
 
   .home-mode-column {
@@ -615,7 +614,6 @@ body {
 
 
 
-
 .mode-button {
   border: 4px solid var(--c-border);
   border-radius: 8px;
@@ -625,7 +623,7 @@ body {
   max-width: min(400px, 90vw);
   padding: 1.2rem;
   position: relative;
-  width: 280px;
+  width: 350px;
 }
 .mode-button:active {
   transform: translateY(1px);
@@ -1244,7 +1242,7 @@ body {
   gap: 0.25rem;
   justify-content: center;
   margin-top: 0.5rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2.5rem;
   flex-wrap: wrap;
   width: 100%;
 }
