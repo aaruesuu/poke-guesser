@@ -620,10 +620,10 @@ body {
   box-shadow: 1px 1px 0 var(--c-border);
   color: var(--c-white);
   cursor: pointer;
-  max-width: min(400px, 90vw);
+  max-width: 600px;
   padding: 1.2rem;
   position: relative;
-  width: 350px;
+  width: 90%;
 }
 .mode-button:active {
   transform: translateY(1px);
@@ -1253,9 +1253,8 @@ body {
   border-radius: 6px;
   font-size: 0.9rem;
   font-weight: 700;
-  max-width: 320px;
-  width: auto;
-  min-width: 130px;
+  max-width: 250px;
+  width: 40%;
   text-align: center;
 }
 .sub-button.subtle {
